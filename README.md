@@ -1,5 +1,8 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Project
+This project is migrating from [TripPlanner](https://github.com/NPTripPlanner/TripPlanner) with Next.js framework for better scalability, SEO ready and performance boost, in addition, with SSR ready. 
+
 ## Getting Started
 
 First, run the development server:
