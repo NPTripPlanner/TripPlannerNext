@@ -1,6 +1,4 @@
-import Head from 'next/head'
-
-export default function Home() {
+export default function Landing() {
   return (
     <div>
       Pure Next.js with Typescript
