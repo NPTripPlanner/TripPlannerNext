@@ -7,6 +7,14 @@ export interface IProps {
     hGutter?: boolean;
 }
 
+/**
+ * Main layout
+ * 
+ * To center children content and have ability to turn on/off for
+ * horionztal and vertical gutter.
+ * 
+ * @param props 
+ */
 const LayoutMain = (props:IProps) => {
     const {
         children,

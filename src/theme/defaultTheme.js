@@ -34,6 +34,13 @@ const theme = createMuiTheme({
     },
   },
   overrides: {
+    MuiCssBaseline:{
+      '@global':{
+        body:{
+          margin:0,
+        }
+      }
+    },
     MuiAvatar: {
       colorDefault: {
         backgroundColor: "transparent",
