@@ -10,7 +10,7 @@ export interface IProps {
 /**
  * Main layout
  * 
- * To center children content and have ability to turn on/off for
+ * To center children content horizontal and have ability to turn on/off for
  * horionztal and vertical gutter.
  * 
  * @param props 
