@@ -5,7 +5,7 @@ export interface IProps {
     children?: React.ReactNode;
     appbar?: React.ReactNode;
 }
-const AppbarLayout = (props:IProps) => {
+const LayoutAppbar = (props:IProps) => {
     const {
         children,
         appbar = undefined,
@@ -19,4 +19,4 @@ const AppbarLayout = (props:IProps) => {
     );
 };
 
-export default AppbarLayout;
+export default LayoutAppbar;

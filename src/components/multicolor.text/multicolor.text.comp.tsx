@@ -1,14 +1,7 @@
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
+import { Box, makeStyles, Typography } from '@material-ui/core';
 import { Variant } from '@material-ui/core/styles/createTypography';
-
-export type ColorType = 'initial'
-| 'inherit'
-| 'primary'
-| 'secondary'
-| 'textPrimary'
-| 'textSecondary'
-| 'error';
+import style from './multicolor.text.style';
 
 export interface IProps {
     /** Prefix text */
@@ -18,17 +11,23 @@ export interface IProps {
     /** Suffix text */
     suffix?: string;
     /** Prefix text color */
-    prefixColor?: ColorType;
+    prefixColor?: string;
     /** Text color */
-    textColor?: ColorType;
+    textColor?: string;
     /** Suffix text color */
-    suffixColor?: ColorType;
+    suffixColor?: string;
     /** Prefix text variant e.g "h1" "h5" "h4" */
     prefixVariant?: Variant;
     /** Text variant e.g "h1" "h5" "h4" */
     textVariant?: Variant;
     /** Suffix text variant e.g "h1" "h5" "h4" */
     suffixVariant?: Variant;
+    /** Prefix font weight */
+    prefixFontWeight?: number;
+    /** Text font weight */
+    textFontWeight?: number;
+    /** Suffix font weight */
+    suffixFontWeight?: number;
     /** Text alignment */
     textAlign?: 'left' | 'center' | 'right';
     /** Prefix text letter spacing */
@@ -58,9 +57,12 @@ const MulticolorText = (props:IProps) => {
         prefixColor = 'primary',
         textColor = 'primary',
         suffixColor = 'primary',
-        prefixVariant = 'h4',
-        textVariant = 'h4',
-        suffixVariant = 'h4',
+        prefixVariant = 'h6',
+        textVariant = 'h6',
+        suffixVariant = 'h6',
+        prefixFontWeight = 400,
+        textFontWeight = 400,
+        suffixFontWeight = 400,
         textAlign = 'left',
         prefixLS = 1,
         textLS = 1,
@@ -68,32 +70,35 @@ const MulticolorText = (props:IProps) => {
 
     } = props;
 
+    const classes = makeStyles(style)({
+        prefixFontWeight,
+        textFontWeight,
+        suffixFontWeight,
+    });
+
     return (
         <Box textAlign={textAlign}>
             {prefix?
                 <Typography 
                 display='inline'
                 component='div'
-                color={prefixColor}
                 variant={prefixVariant}>
-                    <Box display='inline' textAlign='center' letterSpacing={prefixLS}>{prefix}</Box>
+                    <Box className={classes.prefix} color={prefixColor} display='inline' textAlign='center' letterSpacing={prefixLS}>{prefix}</Box>
                 </Typography>
                 :null
             }
             <Typography 
             display='inline'
             component='div'
-            color={textColor}
             variant={textVariant}>
-                <Box display='inline' textAlign='center' letterSpacing={textLS}>{text}</Box>
+                <Box className={classes.text} color={textColor} display='inline' textAlign='center' letterSpacing={textLS}>{text}</Box>
             </Typography>
             {suffix?
                 <Typography
                 display='inline'
                 component='div'
-                color={suffixColor}
                 variant={suffixVariant}>
-                    <Box display='inline' textAlign='center' letterSpacing={suffixLS}>{suffix}</Box>
+                    <Box className={classes.suffix} color={suffixColor} display='inline' textAlign='center' letterSpacing={suffixLS}>{suffix}</Box>
                 </Typography>
                 :
                 null

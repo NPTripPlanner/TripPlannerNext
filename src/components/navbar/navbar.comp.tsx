@@ -1,10 +1,11 @@
 import React from 'react';
 import { AppBar, Box, makeStyles, Toolbar, Typography } from '@material-ui/core';
-import style from './header.style';
+import style from './navbar.style';
 
 export interface IProps {
     brandIcon?: any;
     title: string | React.ReactNode;
+    position?: 'fixed' | 'absolute' | 'sticky' | 'static' | 'relative';
     options?: React.ReactNode[];  
 }
 
@@ -32,23 +33,24 @@ const renderOptions = (options:React.ReactNode[], style)=>{
  * Use material Appbar component
  * @param props 
  */
-const Header = (props:IProps) => {
+const Navbar = (props:IProps) => {
     const {
         brandIcon = null,
         title,
+        position = 'fixed',
         options = null,
     } = props;
 
     const classes = makeStyles(style)();
 
     return (
-        <AppBar>
+        <AppBar position={position}>
             <Toolbar disableGutters>
                 <Box className={classes.left}>
                     <Box pr={1}>
                     {brandIcon}
                     </Box>
-                    <Box px={1}>
+                    <Box pr={1}>
                     {typeof title === "string"?
                         <Typography variant='h5'>title</Typography>
                         :
@@ -62,4 +64,4 @@ const Header = (props:IProps) => {
     );
 };
 
-export default Header;
+export default Navbar;

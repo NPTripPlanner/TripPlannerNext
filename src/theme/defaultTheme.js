@@ -5,6 +5,7 @@ const primaryLightColor = "#d1f2e5";
 const primaryDarkColor = "#aeccc3";
 const secondaryMainColor = "#6C63FF";
 const secondaryDarkColor = "#524ab8";
+const infoLightColor = '#27CBFF';
 const hyperLinkColor = "#6b6664";
 const inputBorderWidth = "3px";
 
@@ -15,12 +16,6 @@ const theme = createMuiTheme({
       "Merienda,cursive",
       "Merienda One,cursive",
     ].join(","),
-    h4: {
-      fontFamily: "Merienda,cursive",
-      "@media (max-width:430px)": {
-        fontSize: "1.3rem",
-      },
-    },
   },
   palette: {
     primary: {
@@ -32,6 +27,10 @@ const theme = createMuiTheme({
       main: secondaryMainColor,
       dark: secondaryDarkColor,
     },
+    info:{
+      main: infoLightColor,
+      light: infoLightColor,
+    }
   },
   overrides: {
     MuiCssBaseline:{
