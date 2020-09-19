@@ -2,6 +2,7 @@ import React from 'react';
 import ProfileAvatar from './profile.avatar.comp';
 import imageUrl from '../../assets/avatar/testAvatar.jpeg';
 import {ArrowDownward} from '@material-ui/icons';
+import {action} from '@storybook/addon-actions';
 
 export default {
   title: 'ProfileAvatar',
@@ -43,6 +44,19 @@ export const option = () => {
         fallbackText='Marray'
         size='large'
         option={<ArrowDownward />}
+        />
+    )
+}
+
+export const click = () => { 
+
+    return (
+        <ProfileAvatar 
+        imageURL={imageUrl} 
+        fallbackText='Marray'
+        size='large'
+        option={<ArrowDownward />}
+        onAvatarClick={()=>action('avatar click')()}
         />
     )
 }

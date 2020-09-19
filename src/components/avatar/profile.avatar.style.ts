@@ -5,6 +5,7 @@ export default theme=>(createStyles({
         display:'flex',
         justifyContent:'center',
         alignItems:'center',
+        cursor:'pointer',
     },
     avatarSmall:{
         width: theme.spacing(3),
