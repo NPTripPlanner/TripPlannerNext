@@ -20,6 +20,8 @@ const navbar = ()=>{
   return (
       <Box>
         <Navbar 
+        color='primary'
+        shadowEl={0}
         brandIcon={
           <SvgIcon aria-hidden={true} fontSize='large'>
             <Brand />

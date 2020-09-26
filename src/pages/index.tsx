@@ -1,6 +1,8 @@
+import { Box } from "@material-ui/core";
+
 export default function Landing() {
   return (
-    <div>
+    <Box>
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris condimentum lorem et malesuada euismod. Fusce venenatis, lacus vel posuere imperdiet, ante ligula auctor nunc, et dictum nisi ipsum id mi. Nulla nec erat non nulla accumsan euismod ut sit amet sapien. Donec viverra varius viverra. Donec ante orci, mattis ac laoreet ut, tempus non turpis. Aenean ac justo non purus consectetur vestibulum sit amet eget ipsum. Proin diam leo, lacinia a auctor non, pulvinar eget tortor. Nullam volutpat augue in ipsum rutrum blandit. Phasellus ultrices risus sed porta efficitur. Donec fringilla varius est, sit amet suscipit augue imperdiet sit amet.
 
 Nam sit amet lacus quam. Fusce auctor gravida pellentesque. Etiam cursus lacus ipsum, bibendum molestie ligula tristique ut. Curabitur ac metus ultrices, consequat erat ac, ornare leo. Suspendisse neque ex, blandit sed risus sit amet, euismod porttitor libero. Curabitur pretium, enim quis vulputate imperdiet, mauris nisi tempus velit, vel consequat turpis arcu in eros. Nulla sit amet arcu vitae lectus placerat consectetur. Nunc vestibulum eros sodales viverra ullamcorper.
@@ -24,6 +26,6 @@ Pellentesque sed lectus gravida, suscipit ligula quis, luctus lacus. Quisque eu 
 Mauris dapibus ligula fermentum dui scelerisque, at ultricies ex dictum. Aenean sed nibh ut ligula molestie feugiat et lobortis dui. Cras ac arcu eu tellus porta pharetra. Mauris enim justo, ornare a ullamcorper id, vehicula vitae nisl. Vestibulum urna metus, vulputate non nibh vel, molestie ultricies dolor. Nam volutpat, ante at fringilla volutpat, ipsum nibh convallis eros, in ornare felis turpis vel dolor. Maecenas congue suscipit libero sit amet egestas. Pellentesque laoreet, mi vulputate auctor accumsan, metus nibh lacinia arcu, id malesuada ipsum augue ut est. Aenean nec scelerisque odio. Nullam eu velit sed ipsum pulvinar aliquam vel non lectus. Vivamus at quam et eros rutrum feugiat. Praesent quam odio, accumsan et lorem sed, venenatis tincidunt est. Cras iaculis rutrum maximus. Sed odio purus, gravida ut risus a, eleifend fringilla odio.
 
 Nulla sit amet ornare enim, vitae molestie metus. Nullam a vehicula ante. Maecenas maximus aliquam urna. Suspendisse ac vestibulum arcu. Suspendisse sed viverra lacus. Phasellus laoreet arcu consequat nisl elementum scelerisque. Vestibulum tempus tortor ut dolor cursus rutrum. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-    </div>
+    </Box>
   )
 }

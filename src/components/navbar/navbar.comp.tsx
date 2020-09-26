@@ -8,7 +8,11 @@ export interface IProps {
     /** Horizontal gutter */
     hGutter?: number;
     position?: 'fixed' | 'absolute' | 'sticky' | 'static' | 'relative';
-    options?: React.ReactNode[];  
+    options?: React.ReactNode[];
+    /** Color of Navbar */
+    color?: 'default' | 'inherit' | 'primary' | 'secondary' | 'transparent';
+    /** Elevation of paper, which is shadow under Navbar */
+    shadowEl?: number;  
 }
 
 const renderOptions = (options:React.ReactNode[], style)=>{
@@ -42,12 +46,14 @@ const Navbar = (props:IProps) => {
         hGutter = 0,
         position = 'fixed',
         options = null,
+        color = 'primary',
+        shadowEl = 5,
     } = props;
 
     const classes = makeStyles(style)();
 
     return (
-        <AppBar position={position}>
+        <AppBar position={position} color={color} elevation={shadowEl}>
             <Box px={hGutter}>
             <Toolbar disableGutters>
                 <Box className={classes.left}>

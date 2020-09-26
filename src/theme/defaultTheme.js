@@ -1,7 +1,7 @@
 import { createMuiTheme, responsiveFontSizes } from "@material-ui/core/styles";
 
 const primaryMainColor = "#bbded6";
-const primaryLightColor = "#d1f2e5";
+const primaryLightColor = "#fff";
 const primaryDarkColor = "#aeccc3";
 const secondaryMainColor = "#6C63FF";
 const secondaryDarkColor = "#524ab8";
@@ -37,7 +37,15 @@ const theme = createMuiTheme({
       '@global':{
         body:{
           margin:0,
+        },
+        ".MuiBox-root":{
+          backgroundColor: primaryLightColor,
         }
+      }
+    },
+    MuiAppBar: {
+      colorPrimary:{
+        backgroundColor: primaryLightColor,
       }
     },
     MuiAvatar: {
