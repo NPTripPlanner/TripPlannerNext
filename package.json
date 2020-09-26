@@ -53,6 +53,7 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.4.2",
     "react-test-renderer": "^16.13.1",
-    "typescript": "^4.0.2"
+    "typescript": "^4.0.2",
+    "url-loader": "^4.1.0"
   }
 }
