@@ -7,7 +7,7 @@ import Navbar from '../components/navbar/navbar.comp';
 import Brand from '../assets/header/pin.svg';
 import MulticolorText from '../components/multicolor.text/multicolor.text.comp';
 
-const header = ()=>{
+const navbar = ()=>{
   const options = [
     <Link component="button">
       <Typography variant='h6'>Explore</Typography>
@@ -35,6 +35,7 @@ const header = ()=>{
           textFontWeight={600} 
           />
         }
+        hGutter={3}
         options={options}
         />
         <Toolbar />
@@ -47,7 +48,7 @@ function App({ Component, pageProps }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LayoutMain hGutter={true}>
-        <LayoutPage header={header()}>
+        <LayoutPage header={navbar()}>
           <Component {...pageProps} />
         </LayoutPage>
       </LayoutMain> 

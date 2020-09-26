@@ -5,6 +5,8 @@ import style from './navbar.style';
 export interface IProps {
     brandIcon?: any;
     title: string | React.ReactNode;
+    /** Horizontal gutter */
+    hGutter?: number;
     position?: 'fixed' | 'absolute' | 'sticky' | 'static' | 'relative';
     options?: React.ReactNode[];  
 }
@@ -37,6 +39,7 @@ const Navbar = (props:IProps) => {
     const {
         brandIcon = null,
         title,
+        hGutter = 0,
         position = 'fixed',
         options = null,
     } = props;
@@ -45,6 +48,7 @@ const Navbar = (props:IProps) => {
 
     return (
         <AppBar position={position}>
+            <Box px={hGutter}>
             <Toolbar disableGutters>
                 <Box className={classes.left}>
                     <Box pr={1}>
@@ -60,6 +64,7 @@ const Navbar = (props:IProps) => {
                 </Box>  
                 {options?renderOptions(options, classes):null} 
             </Toolbar>
+            </Box>
         </AppBar>
     );
 };
