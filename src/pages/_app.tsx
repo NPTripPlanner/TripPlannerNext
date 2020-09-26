@@ -10,11 +10,20 @@ import MulticolorText from '../components/multicolor.text/multicolor.text.comp';
 const navbar = ()=>{
   const options = [
     <Link component="button">
-      <Typography variant='h6'>Explore</Typography>
+      <Typography component='div' variant='h6' color='textPrimary'>
+        <Box>Explore</Box>
+      </Typography>
     </Link>,
     <Link component="button">
-      <Typography variant='h6'>Feature</Typography>
-    </Link>
+      <Typography component='div' variant='h6' color='textPrimary'>
+        <Box>Feature</Box>
+      </Typography>
+    </Link>,
+    <Link component="button">
+    <Typography component='div' variant='h6' color='textPrimary'>
+      <Box>Login</Box>
+    </Typography>
+  </Link>
 
   ];
   return (

@@ -30,7 +30,8 @@ const theme = createMuiTheme({
     info:{
       main: infoLightColor,
       light: infoLightColor,
-    }
+    },
+    divider:infoLightColor
   },
   overrides: {
     MuiCssBaseline:{
@@ -65,20 +66,6 @@ const theme = createMuiTheme({
         alignItems: "center",
       },
     },
-    MuiStep: {
-      horizontal: {
-        paddingLeft: 0,
-        paddingRight: 0,
-      },
-    },
-    MuiLink: {
-      root: {
-        color: hyperLinkColor,
-        "&:hover": {
-          cursor: "pointer",
-        },
-      },
-    },
     MuiDialogTitle: {
       root: {
         backgroundColor: primaryMainColor,
@@ -99,44 +86,6 @@ const theme = createMuiTheme({
         display: "flex",
         justifyContent: "space-evenly",
         alignItems: "center",
-      },
-    },
-    MuiInputLabel: {
-      asterisk: {
-        color: "red",
-        fontSize: "2rem",
-      },
-    },
-    MuiFormLabel: {
-      root: {
-        "&$focused": {
-          color: primaryDarkColor,
-        },
-      },
-    },
-    MuiOutlinedInput: {
-      root: {
-        "&:hover:not($disabled):not($focused):not($error) $notchedOutline": {
-          borderColor: primaryMainColor,
-          borderWidth: inputBorderWidth,
-        },
-        "&$focused $notchedOutline": {
-          borderColor: primaryDarkColor,
-          borderWidth: inputBorderWidth,
-        },
-        backgroundColor: "rgb(232,231,229)",
-      },
-      notchedOutline: {
-        borderColor: secondaryMainColor,
-        borderWidth: inputBorderWidth,
-        transition: "all .3s ease-in-out",
-      },
-      input: {
-        "&::placeholder": {
-          color: "black",
-          fontSize: "1.5rem",
-          fontWeight: 800,
-        },
       },
     },
     MuiCardContent: {
