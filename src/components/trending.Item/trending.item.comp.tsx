@@ -104,7 +104,7 @@ const TrendingItem = (props:IProps) => {
         height={size.height}
         >
             <Box {...imgSize}>
-                <img className={classes.img} src={imageURL} {...imgSize} />
+                <img className={classes.img} src={imageURL} alt={title} {...imgSize} />
             </Box>
             <Typography ref={typoRef} component='div' variant={titleVariant}>
                 <Box textAlign={titleAlignment}>{title}</Box>

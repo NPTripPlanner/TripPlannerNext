@@ -20,7 +20,7 @@ const LayoutLandingPage = (props:IProps) => {
         <React.Fragment>
             <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
                 <Box>
-                    <img src={heroImgURL} />
+                    <img src={heroImgURL} alt='hero image' />
                 </Box>
                 <Box display='flex' flexDirection='column' alignSelf='flex-end' alignItems='flex-end'>
                     {heroTitle}
