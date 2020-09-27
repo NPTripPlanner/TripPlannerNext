@@ -7,6 +7,8 @@ const secondaryMainColor = "#6C63FF";
 const secondaryDarkColor = "#524ab8";
 const infoLightColor = '#27CBFF';
 const hyperLinkColor = "#6b6664";
+const indicatorOnColor = '#bbded6';
+const indicatorOffColor = '#aeccc3';
 const inputBorderWidth = "3px";
 
 const theme = createMuiTheme({
@@ -31,7 +33,9 @@ const theme = createMuiTheme({
       main: infoLightColor,
       light: infoLightColor,
     },
-    divider:infoLightColor
+    divider:infoLightColor,
+    indicatorOn: '#dc23a5',
+    indicatorOff: '#1de24f',
   },
   overrides: {
     MuiCssBaseline:{
