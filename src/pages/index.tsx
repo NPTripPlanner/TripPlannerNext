@@ -41,7 +41,7 @@ export default function Landing() {
       </Typography>
     }
     dest={
-        <Box width='100%' display='flex' justifyContent='center' alignItems='center'>
+        <Box display='flex' justifyContent='center' alignItems='center'>
           <TextField variant='standard' fullWidth placeholder='Where do you want to go?' />
           <Box px={1} height='27px'>
             <Divider classes={{root:classes.divider}} orientation='vertical' />
