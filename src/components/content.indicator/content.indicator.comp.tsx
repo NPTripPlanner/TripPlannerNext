@@ -18,6 +18,12 @@ export interface IProps {
      * Rest of svg icon point to right direction by using transform rotate and scale
      */
     leftIcon: React.ReactNode;
+    /** 
+     * Icon size in px
+     * 
+     * default is 24px
+     */
+    iconSize?: number;
     /** Horizontal indicator state for left and right
      *  
      * default is false 
@@ -62,6 +68,7 @@ const defaultVIndicators = {
 const ContentIndicator = (props:IProps) => {
     const {
         leftIcon,
+        iconSize = 24,
         hState = defaultHIndicators,
         vState = defaultVIndicators,
         isHorizontal = true,
@@ -69,7 +76,7 @@ const ContentIndicator = (props:IProps) => {
         colorDisabled = 'text.disabled'
     } = props;
 
-    const classes = makeStyles(style)();
+    const classes = makeStyles(style)({iconSize});
 
     const boxProps = {
         display:'flex',
@@ -89,19 +96,19 @@ const ContentIndicator = (props:IProps) => {
             isHorizontal?
             [
                 <Box key='left' color={leftColor}>
-                    <SvgIcon>{leftIcon}</SvgIcon>
+                    <SvgIcon className={classes.svgSize}>{leftIcon}</SvgIcon>
                 </Box>,
                 <Box key='right' className={classes.flipX} color={rightColor}>
-                    <SvgIcon>{leftIcon}</SvgIcon>
+                    <SvgIcon className={classes.svgSize}>{leftIcon}</SvgIcon>
                 </Box>
             ]
             :
             [
                 <Box key='top' className={classes.top} color={topColor}>
-                    <SvgIcon>{leftIcon}</SvgIcon>
+                    <SvgIcon className={classes.svgSize}>{leftIcon}</SvgIcon>
                 </Box>,
                 <Box key='down' className={classes.down} color={downColor}>
-                    <SvgIcon>{leftIcon}</SvgIcon>
+                    <SvgIcon className={classes.svgSize}>{leftIcon}</SvgIcon>
                 </Box>
             ]
             }

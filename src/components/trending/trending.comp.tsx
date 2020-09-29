@@ -28,6 +28,7 @@ const Trending = (props:IProps) => {
             <Box width='min-content'>
                 <ContentIndicator 
                 leftIcon={<IndicatorLeft />}
+                iconSize={10}
                 isHorizontal={true}
                 hState={{left:!scrollState.endLeft, right:!scrollState.endRight}}
                 />
