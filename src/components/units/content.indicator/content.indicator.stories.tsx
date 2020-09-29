@@ -1,6 +1,6 @@
 import React from 'react';
 import ContentIndicator from './content.indicator.comp';
-import IndicatorLeft from '../../assets/landingPage/indicator-left.svg';
+import IndicatorLeft from '../../../assets/landingPage/indicator-left.svg';
 
 export default {
   title: 'ContentIndicator',

@@ -1,7 +1,7 @@
 import { Box } from '@material-ui/core';
 import React from 'react';
-import HorizontalScroll, {IHorizontalScrollState} from '../horizontal.scroll/hScroll.comp';
-import ContentIndicator from '../content.indicator/content.indicator.comp';
+import HorizontalScroll, {IHorizontalScrollState} from '../units/horizontal.scroll/hScroll.comp';
+import ContentIndicator from '../../components/units/content.indicator/content.indicator.comp';
 
 import IndicatorLeft from '../../assets/landingPage/indicator-left.svg';
 

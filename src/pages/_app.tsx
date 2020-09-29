@@ -3,9 +3,9 @@ import {ThemeProvider} from '@material-ui/styles';
 import theme from '../theme/defaultTheme';
 import { CssBaseline, Link, SvgIcon, Box, Toolbar, Typography } from '@material-ui/core';
 import LayoutPage from '../layout/layout.page/layout.page';
-import Navbar from '../components/navbar/navbar.comp';
+import Navbar from '../components/units/navbar/navbar.comp';
 import Brand from '../assets/header/pin.svg';
-import MulticolorText from '../components/multicolor.text/multicolor.text.comp';
+import MulticolorText from '../components/units/multicolor.text/multicolor.text.comp';
 
 const navbar = ()=>{
   const options = [
