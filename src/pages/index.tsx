@@ -2,7 +2,27 @@ import { Box, Divider, makeStyles, TextField, Typography } from "@material-ui/co
 import LayoutLandingPage from '../layout/layout.landingPage/layout.landingPage';
 import heroImgURL from '../assets/landingPage/heroimg.png';
 import MulticolorText from "../components/multicolor.text/multicolor.text.comp";
+import Trending from '../components/trending/trending.comp';
+import TrendingItem from '../components/trending.Item/trending.item.comp';
 import style from '../style/index.style';
+
+const imgUrl = 'https://images.unsplash.com/photo-1517935706615-2717063c2225?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=802&q=80';
+const getTrendingItems = ()=>{
+  const items:React.ReactNode[] = [];
+  for(let i=0; i<15; i++){
+    items.push(
+      <TrendingItem 
+      key={i}
+      imageURL={imgUrl}
+      title='Toronto, CA'
+      imgWidth={60}
+      imgHeight={60}
+      cornerRadius={10}
+      />
+    );
+  }
+  return items;
+}
 
 export default function Landing() {
   const classes = makeStyles(style)();
@@ -28,6 +48,9 @@ export default function Landing() {
           </Box>
           <TextField variant='standard' placeholder='Duration' />
         </Box>
+    }
+    trending={
+        <Trending items={getTrendingItems()} />
     }
     />
   )

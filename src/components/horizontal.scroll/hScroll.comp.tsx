@@ -50,6 +50,7 @@ const HorizontalScroll = (props:IProps) => {
     React.useEffect(()=>{
         
         const scrollHandler = ()=>{
+
             const contentWidth = gridRef.current.scrollWidth;
             const outerWidth = gridRef.current.clientWidth;
             const scrollLeft = gridRef.current.scrollLeft;
@@ -75,7 +76,7 @@ const HorizontalScroll = (props:IProps) => {
             }
 
             setScrollState(oldState=>{
-                if(!isSameState(oldState, newState)){ 
+                if(!isSameState(oldState, newState)){
                     return newState;
                 }
                 else{
@@ -93,7 +94,9 @@ const HorizontalScroll = (props:IProps) => {
         }
     }, []);
 
-    if(onScrollStateChange) onScrollStateChange(scrollState);
+    React.useEffect(()=>{
+        if(onScrollStateChange) onScrollStateChange(scrollState);
+    }, [scrollState]);
     
     const boxProps = {
         width: width?`${width}px`:'inherit',

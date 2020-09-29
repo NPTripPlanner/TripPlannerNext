@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Container} from '@material-ui/core';
+import {Box} from '@material-ui/core';
 
 export interface IProps {
     children?: React.ReactNode;
@@ -24,14 +24,21 @@ const LayoutMain = (props:IProps) => {
 
     const boxProps = {
         py: vGutter?2:0,
+        wdith:'100vw',
     }
-    const containerProps = {
-        disableGutters: !hGutter,
+    // const containerProps = {
+    //     disableGutters: !hGutter,
+    // }
+
+    const innerBoxProps = {
+        px:hGutter?3:0,
+        width:'inherit'
     }
 
     return (
         <Box {...boxProps}>
-            <Container {...containerProps}>{children}</Container>
+            {/* <Container  {...containerProps}>{children}</Container> */}
+            <Box {...innerBoxProps}>{children}</Box>
         </Box>
     );
 };

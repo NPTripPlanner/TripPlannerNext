@@ -55,21 +55,21 @@ const Navbar = (props:IProps) => {
     return (
         <AppBar position={position} color={color} elevation={shadowEl}>
             <Box px={hGutter}>
-            <Toolbar disableGutters>
-                <Box className={classes.left}>
-                    <Box pr={1}>
-                    {brandIcon}
-                    </Box>
-                    <Box pr={1}>
-                    {typeof title === "string"?
-                        <Typography variant='h5'>title</Typography>
-                        :
-                        title
-                    }
-                    </Box>
-                </Box>  
-                {options?renderOptions(options, classes):null} 
-            </Toolbar>
+                <Toolbar disableGutters>
+                    <Box className={classes.left}>
+                        <Box pr={1}>
+                        {brandIcon}
+                        </Box>
+                        <Box pr={1}>
+                        {typeof title === "string"?
+                            <Typography variant='h5'>title</Typography>
+                            :
+                            title
+                        }
+                        </Box>
+                    </Box>  
+                    {options?renderOptions(options, classes):null} 
+                </Toolbar>
             </Box>
         </AppBar>
     );

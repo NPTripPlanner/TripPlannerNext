@@ -6,6 +6,7 @@ export interface IProps {
     heroTitle: React.ReactNode;
     heroSubtitle: React.ReactNode;
     dest: React.ReactNode;
+    trending: React.ReactNode;
 }
 
 const LayoutLandingPage = (props:IProps) => {
@@ -13,23 +14,24 @@ const LayoutLandingPage = (props:IProps) => {
         heroImgURL,
         heroTitle,
         heroSubtitle,
-        dest
+        dest,
+        trending
     } = props;
 
     return (
         <React.Fragment>
-            <Box display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                <Box>
+            <Box width='inherit' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
+                <Box width='50%'>
                     <img src={heroImgURL} alt='hero image' />
                 </Box>
-                <Box display='flex' flexDirection='column' alignSelf='flex-end' alignItems='flex-end'>
+                <Box width='50%' display='flex' flexDirection='column' alignSelf='flex-end' alignItems='flex-end'>
                     {heroTitle}
                     {heroSubtitle}
-                    <Box pt={7}>
+                    <Box width='auto' pt={7}>
                     {dest}
                     </Box>
-                    <Box pt={7}>
-                        Trending Destination working in progress
+                    <Box width='100%' pt={7}>
+                    {trending}
                     </Box>
                 </Box>
             </Box>
