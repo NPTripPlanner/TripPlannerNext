@@ -33,12 +33,12 @@ export default function Landing() {
     heroImgURL={heroImgURL}
     heroTitle={
       <Typography className={classes.lineStrike} component='div' variant='h3' align='right'>
-        <Box>Don’t listen to what they say.</Box>
+        <Box>DON’T LISTEN TO  WHAT THEY SAY.</Box>
       </Typography>
     }
     heroSubtitle={
       <Typography component='div' variant='h3' align='right'>
-        <MulticolorText text='Go Explore !' textColor='info.light' textVariant='h3' textFontWeight={800}/>
+        <MulticolorText text='GO EXPLORE !' textColor='info.light' textVariant='h3' textFontWeight={800}/>
       </Typography>
     }
     dest={
@@ -54,6 +54,20 @@ export default function Landing() {
         <Trending items={getTrendingItems()} />
     }
     expandIcon={<ExpandIcon />}
+    detailTitle={
+      <MulticolorText 
+      prefix='ITINERARY CAN BE ' 
+      prefixColor='text.primary' 
+      prefixVariant='h3' prefixFontWeight={800} 
+      text='EASY' 
+      textColor='info.light' 
+      textVariant='h3' 
+      textFontWeight={800}
+      />
+    }
+    detailSubtitle={
+        <MulticolorText text='TRIPLANED IS HERE TO HELP' textColor='text.disabled' textVariant='h6'/>
+    }
     />
   )
 }

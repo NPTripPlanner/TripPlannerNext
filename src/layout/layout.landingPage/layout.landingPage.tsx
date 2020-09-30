@@ -10,6 +10,8 @@ export interface IProps {
     dest: React.ReactNode;
     trending: React.ReactNode;
     expandIcon: React.ReactNode;
+    detailTitle: React.ReactNode;
+    detailSubtitle: React.ReactNode;
 }
 
 const getDefaultHeroBoxProps = ()=>{
@@ -41,7 +43,9 @@ const LayoutLandingPage = (props:IProps) => {
         heroSubtitle,
         dest,
         trending,
-        expandIcon
+        expandIcon,
+        detailTitle,
+        detailSubtitle,
     } = props;
 
     const classes = makeStyles(style)();
@@ -85,9 +89,23 @@ const LayoutLandingPage = (props:IProps) => {
             {/* expand icon */}
             <Grid item xs={12}>
                 <Box width='inherit' p={2} display='flex' justifyContent='center' alignItems='center'>
-                    <Box className={classes.expandIcon} width='40px' height='60px' borderRadius='50px' display='flex' justifyContent='center'alignItems='center'>
+                    <Box 
+                    className={classes.expandIcon} 
+                    width='40px' 
+                    height='60px' 
+                    borderRadius='50px' 
+                    display='flex' 
+                    justifyContent='center'
+                    alignItems='center'>
                         {expandIcon}
                     </Box>
+                </Box>
+            </Grid>
+            {/* detail title */}
+            <Grid item xs={12}>
+                <Box width='inherit' pt={8} display='flex' flexDirection='column' alignItems='flex-start'>
+                {detailSubtitle}
+                {detailTitle}
                 </Box>
             </Grid>
         </Grid>
