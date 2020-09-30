@@ -1,4 +1,5 @@
-import { Box, makeStyles } from '@material-ui/core';
+import { Box, Grid, makeStyles, useMediaQuery } from '@material-ui/core';
+import {Theme} from '@material-ui/core/styles';
 import style from './layout.landingPage.style';
 import React from 'react';
 
@@ -8,6 +9,28 @@ export interface IProps {
     heroSubtitle: React.ReactNode;
     dest: React.ReactNode;
     trending: React.ReactNode;
+}
+
+const getDefaultHeroBoxProps = ()=>{
+    return {
+        width:'inherit',
+        height:'100%',
+        display:'flex',
+        flexDirection:'column',
+        justifyContent:'flex-end',
+        alignItems:'flex-end',
+        ml:2,
+    }
+}
+
+const getDefaultHeroImgBoxProps = ()=>{
+    return {
+        width:'inherit',
+        display:'flex',
+        justifyContent:'center',
+        alignItems:'center',
+        mr:2,
+    }
 }
 
 const LayoutLandingPage = (props:IProps) => {
@@ -21,13 +44,30 @@ const LayoutLandingPage = (props:IProps) => {
 
     const classes = makeStyles(style)();
 
+    const downLG = useMediaQuery((theme:Theme)=>theme.breakpoints.down('sm'));
+
+    let heroImgBoxProps = getDefaultHeroImgBoxProps();
+    if(downLG){
+        heroImgBoxProps["mr"] = 0;
+        heroImgBoxProps["p"] = '5%';
+    }
+
+    let heroBoxProps = getDefaultHeroBoxProps();
+    if(downLG){
+        heroBoxProps["ml"] = 0;
+        heroBoxProps['justifyContent'] = 'center';
+        heroBoxProps['alignItems'] = 'center';
+    }
+
     return (
-        <React.Fragment>
-            <Box width='inherit' display='flex' flexDirection='row' justifyContent='space-between' alignItems='center'>
-                <Box width='50%' mr={2}>
+        <Grid container>
+            <Grid item xs={12} md={6}>
+                <Box {...heroImgBoxProps}>
                     <img className={classes.img} src={heroImgURL} alt='hero image' />
                 </Box>
-                <Box width='50%' display='flex' flexDirection='column' alignSelf='flex-end' alignItems='flex-end' ml={2}>
+            </Grid>
+            <Grid item xs={12} md={6}>
+                <Box {...heroBoxProps}>
                     {heroTitle}
                     {heroSubtitle}
                     <Box width='auto' pt={7}>
@@ -37,8 +77,8 @@ const LayoutLandingPage = (props:IProps) => {
                     {trending}
                     </Box>
                 </Box>
-            </Box>
-        </React.Fragment>
+            </Grid>
+        </Grid>
     );
 };
 
