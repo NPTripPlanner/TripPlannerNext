@@ -5,6 +5,7 @@ import MulticolorText from "../components/units/multicolor.text/multicolor.text.
 import Trending from '../components/trending/trending.comp';
 import TrendingItem from '../components/units/trending.Item/trending.item.comp';
 import style from '../style/index.style';
+import ExpandIcon from '../assets/landingPage/expand.svg';
 
 const imgUrl = 'https://images.unsplash.com/photo-1517935706615-2717063c2225?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=802&q=80';
 const getTrendingItems = ()=>{
@@ -52,6 +53,7 @@ export default function Landing() {
     trending={
         <Trending items={getTrendingItems()} />
     }
+    expandIcon={<ExpandIcon />}
     />
   )
 }
