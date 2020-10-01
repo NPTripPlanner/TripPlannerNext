@@ -1,6 +1,6 @@
 import React from 'react';
 import ProfileAvatar from './profile.avatar.comp';
-import imageUrl from '../../assets/avatar/testAvatar.jpeg';
+import imageUrl from '../../../assets/avatar/testAvatar.jpeg';
 import {ArrowDownward} from '@material-ui/icons';
 import {action} from '@storybook/addon-actions';
 

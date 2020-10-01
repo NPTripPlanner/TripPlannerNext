@@ -6,5 +6,8 @@ export default createStyles({
     },
     expandIcon:{
         boxShadow: '0px 10px 10px #DADADA',
+    },
+    detailTabs:{
+        boxShadow: '0px 10px 20px #E9E9E9',
     }
 });

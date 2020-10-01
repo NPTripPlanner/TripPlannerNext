@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from './navbar.comp';
-import Brand from '../../assets/header/location.svg';
+import Brand from '../../../assets/header/pin.svg';
 import { Box, Link, SvgIcon } from '@material-ui/core';
 
 export default {

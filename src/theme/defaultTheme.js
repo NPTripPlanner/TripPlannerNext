@@ -58,6 +58,29 @@ const theme = createMuiTheme({
         backgroundColor: "transparent",
       },
     },
+    MuiTabs:{
+      indicator:{
+        backgroundColor: infoLightColor,
+      },
+    },
+    MuiTab:{
+      root:{
+        flex:'1 1',
+        maxWidth: 'none',
+        '&:focus': {
+          color: infoLightColor,
+        },
+        '&$selected': {
+          color: infoLightColor,
+        },
+      },
+      textColorInherit:{
+        color: '#BFBFBF',
+      },
+      
+    },
+
+    //might need to remove later
     MuiButton: {
       root: {
         borderRadius: 100,

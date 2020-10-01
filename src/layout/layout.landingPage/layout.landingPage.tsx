@@ -13,6 +13,7 @@ export interface IProps {
     expandIcon: React.ReactNode;
     detailTitle: React.ReactNode;
     detailSubtitle: React.ReactNode;
+    detailTabs: React.ReactNode;
 }
 
 const LayoutLandingPage = (props:IProps) => {
@@ -25,6 +26,7 @@ const LayoutLandingPage = (props:IProps) => {
         expandIcon,
         detailTitle,
         detailSubtitle,
+        detailTabs,
     } = props;
 
     const classes = makeStyles(style)();
@@ -70,6 +72,18 @@ const LayoutLandingPage = (props:IProps) => {
                 <Box width='inherit' pt={8} display='flex' flexDirection='column' alignItems='flex-start'>
                 {detailSubtitle}
                 {detailTitle}
+                </Box>
+            </Grid>
+            {/* tabs */}
+            <Grid item xs={12}>
+                <Box className={classes.detailTabs} width='inherit' mt={8} mb={3} >
+                {detailTabs}
+                </Box>
+            </Grid>
+            {/* detial page */}
+            <Grid item xs={12}>
+                <Box width='inherit' height='400px'>
+                    this is page corespond to each tabs
                 </Box>
             </Grid>
         </Grid>

@@ -1,4 +1,4 @@
-import { Box, Divider, makeStyles, TextField, Typography } from "@material-ui/core";
+import { Box, Divider, makeStyles, Tab, Tabs, TextField, Typography } from "@material-ui/core";
 import LayoutLandingPage from '../layout/layout.landingPage/layout.landingPage';
 import heroImgURL from '../assets/landingPage/heroimg.png';
 import MulticolorText from "../components/units/multicolor.text/multicolor.text.comp";
@@ -6,6 +6,8 @@ import Trending from '../components/trending/trending.comp';
 import TrendingItem from '../components/units/trending.Item/trending.item.comp';
 import style from '../style/index.style';
 import ExpandIcon from '../assets/landingPage/expand.svg';
+import React from "react";
+import { Variant } from "@material-ui/core/styles/createTypography";
 
 const imgUrl = 'https://images.unsplash.com/photo-1517935706615-2717063c2225?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=802&q=80';
 const getTrendingItems = ()=>{
@@ -25,8 +27,25 @@ const getTrendingItems = ()=>{
   return items;
 }
 
+const getTabWithName = (name:string, variant:Variant)=>{
+  return (
+    <Tab label={
+      <Typography component='div' variant={variant}>
+        <Box>{name}</Box>
+      </Typography>
+    }
+    disableRipple 
+    />
+  )
+}
+
 export default function Landing() {
+
   const classes = makeStyles(style)();
+
+  const [tabValue, setTabValue] = React.useState(0);
+
+  const handleTabChange = (_, value:number)=>setTabValue(value);
 
   return (
     <LayoutLandingPage
@@ -67,6 +86,13 @@ export default function Landing() {
     }
     detailSubtitle={
         <MulticolorText text='TRIPLANED IS HERE TO HELP' textColor='text.disabled' textVariant='h6'/>
+    }
+    detailTabs={
+      <Tabs value={tabValue} centered onChange={handleTabChange}>
+        {getTabWithName('Create Itinerary', 'subtitle1')}
+        {getTabWithName('Manage Itinerary', 'subtitle1')}
+        {getTabWithName('Travelling Track', 'subtitle1')}
+      </Tabs>
     }
     />
   )
