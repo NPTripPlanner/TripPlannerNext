@@ -8,6 +8,8 @@ import style from '../style/index.style';
 import ExpandIcon from '../assets/landingPage/expand.svg';
 import React from "react";
 import { Variant } from "@material-ui/core/styles/createTypography";
+import {withTranslation} from '../../nexti18n';
+import { WithTranslation } from "next-i18next";
 
 const imgUrl = 'https://images.unsplash.com/photo-1517935706615-2717063c2225?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=802&q=80';
 const getTrendingItems = ()=>{
@@ -39,7 +41,14 @@ const getTabWithName = (name:string, variant:Variant)=>{
   )
 }
 
-export default function Landing() {
+interface IProps extends WithTranslation {
+
+}
+
+function Landing(props:IProps) {
+  const {
+    t,
+  } = props;
 
   const classes = makeStyles(style)();
 
@@ -52,21 +61,21 @@ export default function Landing() {
     heroImgURL={heroImgURL}
     heroTitle={
       <Typography className={classes.lineStrike} component='div' variant='h3' align='right'>
-        <Box>DON’T LISTEN TO  WHAT THEY SAY.</Box>
+        <Box>{t('heroTitle')}</Box>
       </Typography>
     }
     heroSubtitle={
       <Typography component='div' variant='h3' align='right'>
-        <MulticolorText text='GO EXPLORE !' textColor='info.light' textVariant='h3' textFontWeight={800}/>
+        <MulticolorText text={t('heroSubtitle')} textColor='info.light' textVariant='h3' textFontWeight={800}/>
       </Typography>
     }
     dest={
         <Box display='flex' justifyContent='center' alignItems='center'>
-          <TextField variant='standard' fullWidth placeholder='Where do you want to go?' />
+          <TextField variant='standard' fullWidth placeholder={t('whereToGo')} />
           <Box px={1} height='27px'>
             <Divider classes={{root:classes.divider}} orientation='vertical' />
           </Box>
-          <TextField variant='standard' placeholder='Duration' />
+          <TextField variant='standard' placeholder={t('duration')} />
         </Box>
     }
     trending={
@@ -75,25 +84,33 @@ export default function Landing() {
     expandIcon={<ExpandIcon />}
     detailTitle={
       <MulticolorText 
-      prefix='ITINERARY CAN BE ' 
+      prefix={t('detailTitle')} 
       prefixColor='text.primary' 
       prefixVariant='h3' prefixFontWeight={800} 
-      text='EASY' 
+      text={t('detailTitleSuffix')}
       textColor='info.light' 
       textVariant='h3' 
       textFontWeight={800}
       />
     }
     detailSubtitle={
-        <MulticolorText text='TRIPLANED IS HERE TO HELP' textColor='text.disabled' textVariant='h6'/>
+        <MulticolorText text={t('detailSubtitle')} textColor='text.disabled' textVariant='h6'/>
     }
     detailTabs={
       <Tabs value={tabValue} centered onChange={handleTabChange}>
-        {getTabWithName('Create Itinerary', 'subtitle1')}
-        {getTabWithName('Manage Itinerary', 'subtitle1')}
-        {getTabWithName('Travelling Track', 'subtitle1')}
+        {getTabWithName(t('createItinerary'), 'subtitle1')}
+        {getTabWithName(t('manageItinerary'), 'subtitle1')}
+        {getTabWithName(t('travellingTrack'), 'subtitle1')}
       </Tabs>
     }
     />
   )
 }
+
+Landing.getInitialProps = async () =>{
+  return({
+    namespacesRequired: ['common', 'landing', 'navbar'],
+  })
+}
+
+export default withTranslation('landing')(Landing);

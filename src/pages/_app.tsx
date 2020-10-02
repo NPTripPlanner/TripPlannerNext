@@ -1,60 +1,14 @@
+import App from 'next/app';
 import React from 'react';
+import {appWithTranslation} from '../../nexti18n';
 import LayoutMain from '../layout/layout.main/layout.main';
 import {ThemeProvider} from '@material-ui/styles';
 import theme from '../theme/defaultTheme';
-import { CssBaseline, Link, SvgIcon, Box, Toolbar, Typography } from '@material-ui/core';
+import { CssBaseline} from '@material-ui/core';
 import LayoutPage from '../layout/layout.page/layout.page';
-import Navbar from '../components/units/navbar/navbar.comp';
-import Brand from '../assets/header/pin.svg';
-import MulticolorText from '../components/units/multicolor.text/multicolor.text.comp';
+import Navigation from '../components/navigation/navigation.comp';
 
-const navbar = ()=>{
-  const options = [
-    <Link component="button">
-      <Typography component='div' variant='h6' color='textPrimary'>
-        <Box>Explore</Box>
-      </Typography>
-    </Link>,
-    <Link component="button">
-      <Typography component='div' variant='h6' color='textPrimary'>
-        <Box>Feature</Box>
-      </Typography>
-    </Link>,
-    <Link component="button">
-    <Typography component='div' variant='h6' color='textPrimary'>
-      <Box>Login</Box>
-    </Typography>
-  </Link>
-
-  ];
-  return (
-      <Box>
-        <Navbar 
-        color='primary'
-        shadowEl={0}
-        brandIcon={
-          <SvgIcon aria-hidden={true} fontSize='large'>
-            <Brand />
-          </SvgIcon>
-        }
-        title={
-          <MulticolorText
-          prefix='TRI'
-          prefixColor='info.light'
-          prefixVariant='h4'
-          text='PLANED'
-          textVariant='h4'
-          textFontWeight={600} 
-          />
-        }
-        hGutter={3}
-        options={options}
-        />
-        <Toolbar />
-      </Box>
-  )
-}
-function App({ Component, pageProps }) {
+function TriplanedApp({ Component, pageProps }) {
   
   React.useEffect(() => {
     // Remove the server-side injected CSS.
@@ -68,7 +22,7 @@ function App({ Component, pageProps }) {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LayoutMain hGutter={true}>
-        <LayoutPage header={navbar()}>
+        <LayoutPage header={<Navigation />}>
           <Component {...pageProps} />
         </LayoutPage>
       </LayoutMain> 
@@ -76,4 +30,8 @@ function App({ Component, pageProps }) {
   )
 }
 
-export default App
+TriplanedApp.getInitialProps = async (appContext) => ({
+   ...await App.getInitialProps(appContext),
+})
+
+export default appWithTranslation(TriplanedApp);
