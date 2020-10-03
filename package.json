@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "next-on-netlify",
     "start": "next start",
     "test": "jest --forceExit --detectOpenHandles",
     "test-watch": "jest --watch",
@@ -26,6 +27,7 @@
     "moment-timezone": "^0.5.31",
     "next": "9.5.3",
     "next-i18next": "^6.0.3",
+    "next-on-netlify": "^2.5.1",
     "notistack": "^1.0.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
