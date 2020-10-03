@@ -6,6 +6,10 @@
       "dom.iterable",
       "esnext"
     ],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "experimentalDecorators": true,
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -20,6 +24,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "@types/index.d.ts",
     "**/*.ts",
     "**/*.tsx"
   ],
