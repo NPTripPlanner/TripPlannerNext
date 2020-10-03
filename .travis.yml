@@ -27,5 +27,6 @@ deploy:
   auth: $Triplaned_Netlify_Token
   # local_dir: build
   dir: ".next"
+  edge: false
   on:
     branch: master
