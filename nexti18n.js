@@ -8,5 +8,5 @@ module.exports = new NextI18Next({
   otherLanguages: ['zht'],
   defaultLanguage: 'en',
   // localeSubpaths,
-  localePath: path.resolve('./locales')
+  localePath: path.resolve('./public/locales')
 })
