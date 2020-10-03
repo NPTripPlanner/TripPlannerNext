@@ -10,6 +10,8 @@ import React from "react";
 import { Variant } from "@material-ui/core/styles/createTypography";
 import {withTranslation} from '../../nexti18n';
 import { WithTranslation } from "next-i18next";
+import useMediaQuery from "@material-ui/core/useMediaQuery/useMediaQuery";
+import { Theme } from "@material-ui/core/styles/createMuiTheme";
 
 const imgUrl = 'https://images.unsplash.com/photo-1517935706615-2717063c2225?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=802&q=80';
 const getTrendingItems = ()=>{
@@ -56,11 +58,13 @@ function Landing(props:IProps) {
 
   const handleTabChange = (_, value:number)=>setTabValue(value);
 
+  const downSM = useMediaQuery((theme:Theme)=>theme.breakpoints.down('sm'));
+
   return (
     <LayoutLandingPage
     heroImgURL={heroImgURL}
     heroTitle={
-      <Typography className={classes.lineStrike} component='div' variant='h3' align='right'>
+      <Typography className={classes.lineStrike} component='div' variant='h3' align={downSM?'center':'right'}>
         <Box>{t('heroTitle')}</Box>
       </Typography>
     }

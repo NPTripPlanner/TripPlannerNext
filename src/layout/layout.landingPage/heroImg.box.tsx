@@ -22,10 +22,10 @@ const HeroImageBox = (props:IProps) => {
         children
     } = props;
 
-    const downLG = useMediaQuery((theme:Theme)=>theme.breakpoints.down('sm'));
+    const downSM = useMediaQuery((theme:Theme)=>theme.breakpoints.down('sm'));
 
     let heroImgBoxProps = getDefaultHeroImgBoxProps();
-    if(downLG){
+    if(downSM){
         heroImgBoxProps["mr"] = 0;
         heroImgBoxProps["p"] = '5%';
     }
