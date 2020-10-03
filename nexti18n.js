@@ -7,7 +7,6 @@ module.exports = new NextI18Next({
   serverLanguageDetection:false,
   otherLanguages: ['zht'],
   defaultLanguage: 'en',
-  localeSubpaths,
-  ns: ['404', 'common', 'landing', 'navbar'],
+  // localeSubpaths,//with this "next export" is not support
   localePath: path.resolve('./public/static/locales')
 })

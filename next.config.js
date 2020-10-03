@@ -9,7 +9,7 @@ module.exports = {
     publicRuntimeConfig: {
         localeSubpaths,
     },
-    target: "serverless",
+    // target: "serverless",
     webpack : (config, _options) => {
         config.module.rules.push({
             test: /\.(png|jpg|gif)$/i,

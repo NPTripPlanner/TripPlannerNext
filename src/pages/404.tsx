@@ -21,11 +21,10 @@ function PageNotFound(props:IProps) {
     );
 };
 
-// PageNotFound.getInitialProps = async ()=>{
-//     console.log('404 get initial props')
-//     return({
-//         namespacesRequired: ['common', '404', 'navbar'],
-//     })
-// }
+PageNotFound.getInitialProps = async ()=>{
+    return({
+        namespacesRequired: ['common', '404', 'navbar'],
+    })
+}
 
-export default withTranslation('common')(PageNotFound);
+export default withTranslation('404')(PageNotFound);
