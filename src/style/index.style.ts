@@ -1,6 +1,6 @@
 import { createStyles } from "@material-ui/core";
 
-export default theme=>(createStyles({
+const style = theme=>(createStyles({
     lineStrike: {
         textDecoration: 'line-through',
     },
@@ -9,3 +9,5 @@ export default theme=>(createStyles({
         width:'4px',
     }
 }));
+
+export default style;

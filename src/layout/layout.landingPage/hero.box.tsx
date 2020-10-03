@@ -24,9 +24,9 @@ const HeroBox = (props:IProps) => {
         children
     } = props;
 
-    const downLG = useMediaQuery((theme:Theme)=>theme.breakpoints.down('sm'));
+    const downSM = useMediaQuery((theme:Theme)=>theme.breakpoints.down('sm'));
     let heroBoxProps = getDefaultHeroBoxProps();
-    if(downLG){
+    if(downSM){
         heroBoxProps["ml"] = 0;
         heroBoxProps['justifyContent'] = 'center';
         heroBoxProps['alignItems'] = 'center';
