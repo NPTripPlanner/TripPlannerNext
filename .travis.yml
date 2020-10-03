@@ -20,8 +20,7 @@ after_failure:
   - "cat /home/travis/.npm/_logs/*.log"
 deploy:
   provider: netlify
-  verbose: true
-  skip_cleanup: true
+  cleanup: true
   site: Triplaned
   # github_token: $TripPlanner_Github_Token
   auth: $Triplaned_Netlify_Token
