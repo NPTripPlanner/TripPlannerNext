@@ -5,11 +5,15 @@
         "@babel/preset-env":{"modules": false},
         "@babel/preset-react":{},
         "@babel/preset-typescript":{},
-        "@babel/plugin-proposal-decorators":{"legacy": true },
-        "@babel/proposal-class-properties":{"loose": true},
-        "@babel/plugin-transform-runtime":{}
+        // "@babel/plugin-proposal-decorators":{"legacy": true},
+        "@babel/proposal-class-properties":{"loose": true}
+        // "@babel/plugin-transform-runtime":{}
         }
       ]
     ],
-    "plugins": ["inline-react-svg"]
+    "plugins": [
+      "inline-react-svg",
+      ["@babel/plugin-proposal-decorators", {"legacy": true}],
+      ["@babel/plugin-transform-runtime", {}]
+    ]
 }

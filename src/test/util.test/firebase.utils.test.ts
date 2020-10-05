@@ -25,11 +25,12 @@ import {
   GetScheduls,
   GetScheduleById,
   UpdateSchedule,
-} from "./firebase.utils";
+  UpdateItinerary
+} from "../../utils/firebase/firebase.utils";
 
 import { TripArchive, Itinerary } from "../../schema/firestore.schema";
 import ImprovedRepository from "../../schema/ImprovedRepository";
-import { CloneObject } from "../utils";
+import { CloneObject } from "../../utils/utils";
 // import {SortArray} from './utils';
 
 describe("Firebase utility test", () => {
@@ -58,24 +59,24 @@ describe("Firebase utility test", () => {
     }
   });
   
-  describe('init user block', ()=>{
+  describe('init user module', ()=>{
     afterAll(async (done) => {
       done();
     });
 
-    it('initialize user', async ()=>{
+    it('initializeUser function', async ()=>{
       const result = await initializeUser(fakeUser);
 
       return expect(result).toBeTruthy();
     })
   })
 
-  describe('create trip archive', ()=>{
+  describe('create trip archive module', ()=>{
     afterAll(async (done) => {
       done();
     });
 
-    it('create trip archive under user id', async ()=>{
+    it('CreateTripArchive() function', async ()=>{
       expect(CreateTripArchive(fakeUser.uid, 'trip archive 1'))
       .resolves
       .not
@@ -89,127 +90,64 @@ describe("Firebase utility test", () => {
     })
   })
 
-  //need to rewrite with GetDataByQuery
-  describe('get trip archive', ()=>{
+  describe('delete trip archive module', ()=>{
+    let archive;
+
+    beforeAll(async ()=>{
+      archive = await CreateTripArchive(fakeUser.uid, 'If you see this, it is a problem');
+    })
+
     afterAll(async (done) => {
       done();
     });
 
-    // it('get specific trip archive', async ()=>{
-    //   const archiveName = 'special trip archive';
-    //   const result = await CreateTripArchive(fakeUser.uid, archiveName);
-    //   const archive = await GetTripArchive(fakeUser.uid, result.id);
+    it('DeleteTripArchive() function', async ()=>{
 
-    //   expect(archive.ownerId).toEqual(result.ownerId);
-    //   return expect(archive.id).toEqual(result.id);
-    // })
-
-    // it('get all trip archive by user id', async ()=>{
-    //   expect(FetchTripArchive(fakeUser.uid))
-    //   .resolves
-    //   .not
-    //   .toThrowError()
-
-    //   const result = await FetchTripArchive(fakeUser.uid);
-    //   expect(result).not.toBeNull();
-    //   return expect(result[0].ownerId).toEqual(fakeUser.uid);
-    // })
-
-    // it('get trip archive in batch by 1', async ()=>{
-    //   expect(FetchTripArchive(fakeUser.uid))
-    //   .resolves
-    //   .not
-    //   .toThrowError();
-
-    //   let batch = await SearchTripArchive(fakeUser.uid, '', 1);
-    //   expect(batch.lastDocSnapshotCursor).not.toBeNull();
-    //   batch = await SearchTripArchive(fakeUser.uid, '', 1, batch.lastDocSnapshotCursor);
-    //   return expect(batch.lastDocSnapshotCursor).not.toBeNull();
-    // })
-
-    // it('get trip archive in batch by 2', async ()=>{
-    //   expect(FetchTripArchive(fakeUser.uid))
-    //   .resolves
-    //   .not
-    //   .toThrowError();
-
-    //   let batch = await SearchTripArchive(fakeUser.uid, '',2);
-    //   expect(batch.results.length).toEqual(2);
-
-    //   batch = await SearchTripArchive(fakeUser.uid, '',2, batch.lastDocSnapshotCursor);
-    //   return expect(batch.results.length).toEqual(2);
-    // })
-
-    // it('get trip archive without batch', async ()=>{
-    //   expect(FetchTripArchive(fakeUser.uid))
-    //   .resolves
-    //   .not
-    //   .toThrowError();
-
-    //   let batch = await SearchTripArchive(fakeUser.uid, '',4);
-
-    //   const sortedResults = SortArray(batch.results, 'createAt');
-    //   // sortedResults.map((val)=>{
-    //   //   console.log(val.metadata.createAt, val);
-    //   //   return val;
-    //   // })
-
-    //   return expect(sortedResults.length).toEqual(4);
-    // })
-
-  })
-
-  describe('delete trip archive', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-
-    it('delete 1 trip archive', async ()=>{
-      const result = await CreateTripArchive(fakeUser.uid, 'If you see this, it is a problem');
-
-      const deleteResult = DeleteTripArchive(fakeUser.uid, result.id);
+      const deleteResult = DeleteTripArchive(fakeUser.uid, archive.id);
       return expect(deleteResult).toBeTruthy();
 
     })
   })
 
-  describe('update trip archive', ()=>{
+  describe('update trip archive module', ()=>{
+    const oldName = 'name will be changed';
+    const newName = 'new name';
+    let archive;
+
+    beforeAll(async ()=>{
+      archive = await CreateTripArchive(fakeUser.uid, oldName);
+    })
+
     afterAll(async (done) => {
       done();
     });
 
-    it('update trip archive name', async ()=>{
-      const oldName = 'name will be changed';
-      const newName = 'new name';
-
-      const result = await CreateTripArchive(fakeUser.uid, oldName);
-      expect(result.name).toEqual(oldName);
-
-      const updateResult = await UpdateTripArchiveName(fakeUser.uid, result.id, newName);
+    it('UpdateTripArchiveName() function', async ()=>{
+      const updateResult = await UpdateTripArchiveName(fakeUser.uid, archive.id, newName);
       return expect(updateResult.name).toEqual(newName);
 
     })
   })
 
-  describe('listen to collection', ()=>{
+  describe('real-time listen to collection module', ()=>{
     afterAll(async (done) => {
       done();
     });
-    beforeEach((done)=>{
+    beforeAll(()=>{
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000000;
-      done();
     })
 
-    it('listen documents under collection', async()=>{
+    it('ListenToRepository() function', async()=>{
       //will use jest to spy on it
       const cbObj ={ 
         fn:(_docs)=>{
+          //uncomment to see log
           // console.log('receive documents changed under collection', docs);
         }
       };
       const spy = jest.spyOn(cbObj, 'fn');
 
-      //listen to collection change
+      //start listening to collection change
       const unsubscribe = ListenToRepository<TripArchive, ImprovedRepository<TripArchive>>(
         await GetRepository(TripArchive), 
         cbObj.fn,
@@ -229,6 +167,7 @@ describe("Firebase utility test", () => {
         }, 3000);
       });
 
+      //stop listening
       unsubscribe();
 
       expect(spy).toHaveBeenCalled();
@@ -238,20 +177,26 @@ describe("Firebase utility test", () => {
 
   })
   
-  describe('listen to one document change', ()=>{
+  describe('real-time listen to one document module', ()=>{
+    const oldName = 'change this document\'s name';
+    let repo;
+    let archive;
+    let docRef;
+
     afterAll(async (done) => {
       done();
     });
-    beforeEach((done)=>{
+
+    beforeAll(async ()=>{
       jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000000;
-      done();
+
+      repo = await GetRepository(TripArchive);
+      archive = await CreateTripArchive(fakeUser.uid, oldName);
+      docRef = repo.getDocumentReference(archive.id);
     })
 
-    it('listen to document', async ()=>{
-      const oldName = 'change this document\'s name';
-      const repo = await GetRepository(TripArchive);
-      const result = await CreateTripArchive(fakeUser.uid, oldName);
-      const docRef = repo.getDocumentReference(result.id);
+    it('ListenToDocument() function', async ()=>{
+      
       //will use jest to spy on it
       const cbObj={
         fn:(_doc)=>{
@@ -262,78 +207,35 @@ describe("Firebase utility test", () => {
       const spy = jest.spyOn(cbObj, 'fn');
   
       //check if document's name is old name
-      let doc = await repo.findById(result.id);
+      let doc = await repo.findById(archive.id);
       expect(doc.name).toEqual(oldName);
   
-      //listen to document change
+      //start listening to document change
       const unsubscribe = ListenToDocument<TripArchive, ImprovedRepository<TripArchive>>(
       repo, docRef, cbObj.fn,(err)=>console.log(err));
       
       //update document's name to new name
       const newName = 'The name has been changed';
-      doc = await repo.findById(result.id);
+      doc = await repo.findById(archive.id);
       doc.name = newName;
       await repo.update(doc);
-  
-      //uncomment and manual change in firestore to see the result
-      //you have 20 sec to change value
-      // await new Promise((res)=>{
-      //   const time = setTimeout(()=>{
-      //     clearTimeout(time);
-      //     res(true);
-      //   }, 20000);
-      // });
       
+      //stop listening
       unsubscribe();
   
       expect(spy).toBeCalled();
-      doc = await repo.findById(result.id);
+      doc = await repo.findById(archive.id);
       return expect(doc.name).toEqual(newName);
     })
   });
 
-  //need to rewrite with GetDataByQuery
-  describe('search trip archive', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-
-    // beforeAll(async ()=>{
-    //   await CreateTripArchive(fakeUser.uid, 'my trip to nowhere');
-    //   await CreateTripArchive(fakeUser.uid, 'Fun in Italy');
-    //   await CreateTripArchive(fakeUser.uid, 'trip to france');
-    //   await CreateTripArchive(fakeUser.uid, '100 100 100');
-    //   await CreateTripArchive(fakeUser.uid, '200 200 200');
-    // })
-
-    // it('search trip archive by name', async ()=>{
-
-    //   const result = await SearchTripArchive(fakeUser.uid,'france', 10);
-    //   expect(result.results).toHaveLength(1);
-
-    //   const moreResult = await SearchTripArchive(fakeUser.uid, 'trip to france', 10);
-    //   expect(moreResult.results.length).toBeGreaterThan(1);
-
-    //   const fetch1 = await SearchTripArchive(fakeUser.uid, 'trip', 2);
-    //   expect(fetch1.results).toHaveLength(2);
-
-    //   const fetch2 = await SearchTripArchive(fakeUser.uid, 'trip', 2, fetch1.lastDocSnapshotCursor);
-    //   expect(fetch2.results).toHaveLength(2);
-
-    //   const noKeyWords = await SearchTripArchive(fakeUser.uid, '', 5, fetch1.lastDocSnapshotCursor);
-    //   expect(noKeyWords.results).toHaveLength(5);
-
-    //   const onlytwo = await SearchTripArchive(fakeUser.uid, '100 200', 0);
-    //   return expect(onlytwo.results).toHaveLength(2);
-    // })
-  })
-
-  describe('get data by query', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-
+  describe('get data by query module', ()=>{
     let repo = null;
+
+    afterAll(async (done) => {
+      done();
+    });
+
     beforeAll(async ()=>{
       repo = await GetRepository(TripArchive);
       await CreateTripArchive(fakeUser.uid, '@@ $$ %%');
@@ -345,7 +247,7 @@ describe("Firebase utility test", () => {
       await CreateTripArchive(fakeUser.uid, 'Hungary Travel');
     })
 
-    it('find a data by keywords', async ()=>{
+    it('GetDataByQuery() function with search keyword, 1 result', async ()=>{
       const keywords = ConvertSearchKeywordToArray('yy $$');
 
       const colRef = await GetCollectionRef(TripArchive);
@@ -358,7 +260,7 @@ describe("Firebase utility test", () => {
       return expect(result.results).toHaveLength(1);
     })
 
-    it('can not find a data by keywords', async ()=>{
+    it('GetDataByQuery() function with search keyword, no result', async ()=>{
       const keywords = ConvertSearchKeywordToArray('^^^^^^^^^');
 
       const colRef = await GetCollectionRef(TripArchive);
@@ -371,7 +273,7 @@ describe("Firebase utility test", () => {
       return expect(result.results).toHaveLength(0);
     })
 
-    it('find multiple data by keywords in page', async ()=>{
+    it('GetDataByQuery() function with search keyword, multiple result in pagination', async ()=>{
       const words = 'Germany Greece USA Australia Hungary France';
       const keywords = ConvertSearchKeywordToArray(words);
 
@@ -399,22 +301,22 @@ describe("Firebase utility test", () => {
     })
   })
 
-  describe('create itinerary', ()=>{
+  describe('create itinerary module', ()=>{
+    let tripArchive: TripArchive = null;
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate()+3);
+    const name = 'my new itinerary';
+
     afterAll(async (done) => {
       done();
     });
 
-    let tripArchive: TripArchive = null;
     beforeAll(async ()=>{
       tripArchive = await CreateTripArchive(fakeUser.uid, 'create itinerary');
     })
 
-    it('create an itinerary', async ()=>{
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate()+3);
-      const name = 'my new itinerary';
-
+    it('CreateItineraryForTripArchive() function', async ()=>{
       await CreateItineraryForTripArchive(
         fakeUser.uid,
         tripArchive.id,
@@ -436,79 +338,84 @@ describe("Firebase utility test", () => {
     })
   })
 
-  //Need to rewrite with UpdateItinerary
-  describe('update itinerary', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-
-    // let tripArchive: TripArchive = null;
-    // beforeAll(async ()=>{
-    //   tripArchive = await CreateTripArchive(fakeUser.uid, 'update itinerary');
-    // })
-
-    // it('update an itinerary name', async ()=>{
-    //   const startDate = new Date();
-    //   const endDate = new Date();
-    //   endDate.setDate(startDate.getDate()+3);
-    //   const oldName = 'you see this, something went wrong';
-    //   const newName = 'itinerary name has been changed';
-
-    //   const it = await CreateItineraryForTripArchive(
-    //     fakeUser.uid,
-    //     tripArchive.id,
-    //     oldName,
-    //     startDate.toUTCString(),
-    //     endDate.toUTCString()
-    //   );
-
-    //   expect(it).not.toBeNull();
-    //   expect(it.tripArchiveId).toEqual(tripArchive.id);
-      
-    //   const updatedIt = await UpdateItineraryName(fakeUser.uid, tripArchive.id, it.id, newName);
-    //   expect(updatedIt).not.toBeNull();
-    //   expect(updatedIt.tripArchiveId).toEqual(tripArchive.id);
-    //   expect(updatedIt.id).toEqual(it.id);
-    //   return expect(updatedIt.name).toEqual(newName);
-    // })
-  })
-
-  describe('delete itinerary', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-
+  describe('update itinerary module', ()=>{
     let tripArchive: TripArchive = null;
+    let itnerary: Itinerary;
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate()+3);
+    const name = 'my new itinerary';
+
+    afterAll(async (done) => {
+      done();
+    });
+
     beforeAll(async ()=>{
-      tripArchive = await CreateTripArchive(fakeUser.uid, 'delete itinerary');
-    })
-
-    it('delete an itinerary', async ()=>{
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate()+3);
-      const name = 'deleted not able to see this';
-
-      const it = await CreateItineraryForTripArchive(
+      tripArchive = await CreateTripArchive(fakeUser.uid, 'create itinerary');
+      itnerary = await CreateItineraryForTripArchive(
         fakeUser.uid,
         tripArchive.id,
         name,
         startDate,
         endDate
       );
+    });
 
-      expect(it).not.toBeNull();
-      expect(it.tripArchiveId).toEqual(tripArchive.id);
+    it('UpdateItinerary() function', async ()=>{
+      const newName = 'my updated itinerary';
+      const returnedIt = await UpdateItinerary(fakeUser.uid, tripArchive.id, itnerary.id, {
+        name: newName,
+        startDate: startDate,
+        endDate: endDate,
+      });
+
+      return expect(returnedIt.name).toEqual(newName);
+    })
+  })
+
+  describe('delete itinerary module', ()=>{
+    let tripArchive: TripArchive = null;
+    let itinerary;
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate()+3);
+    const name = 'deleted not able to see this';
+
+    afterAll(async (done) => {
+      done();
+    });
+
+    beforeAll(async ()=>{
+      tripArchive = await CreateTripArchive(fakeUser.uid, 'delete itinerary');
+
+      itinerary = await CreateItineraryForTripArchive(
+        fakeUser.uid,
+        tripArchive.id,
+        name,
+        startDate,
+        endDate
+      );
+    })
+
+    it('DeleteItinerary() function', async ()=>{
+
+      expect(itinerary).not.toBeNull();
+      expect(itinerary.tripArchiveId).toEqual(tripArchive.id);
       
-      const result = await DeleteItinerary(fakeUser.uid, tripArchive.id, it.id);
+      const result = await DeleteItinerary(fakeUser.uid, tripArchive.id, itinerary.id);
       expect(result).toBeTruthy();
 
-      const nonExists = await tripArchive.itineraries.findById(it.id);
+      const nonExists = await tripArchive.itineraries.findById(itinerary.id);
       return expect(nonExists).toBeNull();
     })
   })
 
-  describe('query itinerary', ()=>{
+  describe('query itinerary module', ()=>{
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate()+3);
+    const names = [];
+
     afterAll(async (done) => {
       done();
     });
@@ -517,11 +424,7 @@ describe("Firebase utility test", () => {
     beforeAll(async ()=>{
       tripArchive = await CreateTripArchive(fakeUser.uid, 'delete itinerary');
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate()+3);
-      const names = [];
-
+      //create 12 itineraries
       for(let i=0; i<12; i++){
         names.push(`itinerary name ${i}`);
       }
@@ -537,7 +440,7 @@ describe("Firebase utility test", () => {
       }
     })
 
-    it('query itineraries', async ()=>{
+    it('query all itineraries', async ()=>{
 
       const repo = await ConvertRepo<Itinerary>(tripArchive.itineraries);
       let query = repo.getCollectionReference().orderBy('createAt', 'desc');
@@ -546,20 +449,20 @@ describe("Firebase utility test", () => {
     })
   })
 
-  describe('Schedule CRUD', ()=>{
+  describe('Schedule CRUD module', ()=>{
+    let tripArchive = null;
+    let itinerary = null;
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate()+3);
+    const itName = 'Schedule CRUD';
+
     afterAll(async (done) => {
       done();
     });
 
-    let tripArchive = null;
-    let itinerary = null;
     beforeAll(async ()=>{
       tripArchive = await CreateTripArchive(fakeUser.uid, 'Schedule CRUD');
-
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate()+3);
-      const itName = 'Schedule CRUD';
 
       itinerary = await CreateItineraryForTripArchive(
         fakeUser.uid,
@@ -570,7 +473,7 @@ describe("Firebase utility test", () => {
       );
     });
 
-    it('create a schedule', async ()=>{
+    it('CreateScheduleForItinerary() function', async ()=>{
 
       const newSchedule = await CreateScheduleForItinerary(itinerary, new Date(), 'note for schedule');
       return expect(newSchedule).toBeTruthy();
