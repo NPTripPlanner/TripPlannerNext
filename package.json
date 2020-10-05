@@ -9,6 +9,7 @@
     "start": "next start",
     "test": "jest --forceExit --detectOpenHandles",
     "test-watch": "jest --watch",
+    "ui-test":"jest src/__tests__/ui.test/*.test.tsx",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
