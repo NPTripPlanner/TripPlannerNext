@@ -1,20 +1,29 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+import * as functions from 'firebase-functions';
+import { CallableContext } from 'firebase-functions/lib/providers/https';
+// const functions = require('firebase-functions');
+// const admin = require('firebase-admin');
+import * as admin from 'firebase-admin';
+
 const adminApp = admin.initializeApp({
     projectId:'tripplanner-9563b'
 })
 const firestore = adminApp.firestore();
 
-const utils = require('./src/utils/utils');
-utils.init(adminApp);
-const trip = require('./src/utils/trip.utils');
-const user = require('./src/utils/user.utils');
-const itinerary = require('./src/utils/itinerary.utils');
-const commonUtils = require('./src/utils/commom.utils');
-const trigger = require('./src/utils/trigger.utils');
+import {initUtils} from './utils/utils';
+import { IUserData } from './utils/user.utils';
+initUtils(adminApp);
 
-const mockAuth = require('./src/__tests__/mock/mock.auth');
-const { QuerySnapshot } = require('@google-cloud/firestore');
+
+
+
+// const utils = require('./utils/utils');
+// utils.init(adminApp);
+const trip = require('./utils/trip.utils');
+const user = require('./utils/user.utils');
+const itinerary = require('./utils/itinerary.utils');
+const trigger = require('./utils/trigger.utils');
+
+const mockAuth = require('./mock/mock.auth');
 
 const env = process.env.NODE_ENV;
 
@@ -23,13 +32,15 @@ if(process.env.NODE_ENV === 'production'){
 }
 
 class ValidateError extends Error{
-    constructor(code, message){
+    code:string;
+
+    constructor(code:string, message:string){
         super(message);
         this.code = code;
     }
 }
 
-function validateAuthFromFunctionContext(context,  errorMsg=''){
+function validateAuthFromFunctionContext(context:CallableContext,  errorMsg:string=''){
 
     if (env==='test') {
       console.log("Authentication is mocked for integration testing");
@@ -47,7 +58,7 @@ function validateAuthFromFunctionContext(context,  errorMsg=''){
             email: string,
  * }
  */
-exports.initUser = functions.https.onCall(async (data, context) => {
+exports.initUser = functions.https.onCall(async (data:IUserData, context:CallableContext) => {
 
     try{
         validateAuthFromFunctionContext(context, 'Initialize user fail');
@@ -256,12 +267,12 @@ exports.deleteItinerary = functions.https.onCall(async (data, context)=>{
     }
 });
 
-exports.triggerTripArchiveCreate = functions.firestore.document('tripArchive/{archive_id}')
-.onCreate(trigger.updateTagsOnCreated);
-exports.triggerTripArchiveChange = functions.firestore.document('tripArchive/{archive_id}')
-.onUpdate(trigger.updateTagsOnChanged);
+// exports.triggerTripArchiveCreate = functions.firestore.document('tripArchive/{archive_id}')
+// .onCreate(trigger.updateTagsOnCreated);
+// exports.triggerTripArchiveChange = functions.firestore.document('tripArchive/{archive_id}')
+// .onUpdate(trigger.updateTagsOnChanged);
 
-exports.triggerItineraryCreate = functions.firestore.document('tripArchive/{archive_id}/itineraries/{itinerary_id}')
-.onCreate(trigger.updateTagsOnCreated);
-exports.triggerItineraryChange = functions.firestore.document('tripArchive/{archive_id}/itineraries/{itinerary_id}')
-.onUpdate(trigger.updateTagsOnChanged);
+// exports.triggerItineraryCreate = functions.firestore.document('tripArchive/{archive_id}/itineraries/{itinerary_id}')
+// .onCreate(trigger.updateTagsOnCreated);
+// exports.triggerItineraryChange = functions.firestore.document('tripArchive/{archive_id}/itineraries/{itinerary_id}')
+// .onUpdate(trigger.updateTagsOnChanged);
