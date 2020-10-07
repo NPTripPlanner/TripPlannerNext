@@ -9,7 +9,6 @@ export interface IProps {
 
 const getDefaultHeroImgBoxProps = ()=>{
     return {
-        width:'inherit',
         display:'flex',
         justifyContent:'center',
         alignItems:'center',

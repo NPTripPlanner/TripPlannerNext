@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "export": "next export",
+    "deploy-build": "npm run build && npm run export",
     "start": "next start",
     "test": "jest --forceExit --detectOpenHandles",
     "test-watch": "jest --watch",

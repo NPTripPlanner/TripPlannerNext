@@ -27,7 +27,7 @@ const LayoutPage = (props:IProps) => {
     } = props;
     
     return (
-        <Box width='inherit'>
+        <Box>
             {renderHeader(header)}
             <Box width='inherit'>
                 {children}

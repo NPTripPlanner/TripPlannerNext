@@ -99,7 +99,7 @@ const HorizontalScroll = (props:IProps) => {
     }, [scrollState]);
     
     const boxProps = {
-        width: width?`${width}px`:'inherit',
+        width: width?`${width}px`:'auto',
     }
 
     const childNodes = (typeof children === 'function')?children():children;

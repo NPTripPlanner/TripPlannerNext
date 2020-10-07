@@ -9,7 +9,6 @@ export interface IProps {
 
 const getDefaultHeroBoxProps = ()=>{
     return {
-        width:'inherit',
         height:'100%',
         display:'flex',
         flexDirection:'column',
