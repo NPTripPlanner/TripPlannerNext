@@ -24,7 +24,7 @@ const Trending = (props:IProps) => {
     }
 
     return (
-        <Box width='inherit' display='flex' flexDirection='column' justifyContent='center' alignItems='flext-start'>
+        <Box display='flex' flexDirection='column' justifyContent='center' alignItems='flext-start'>
             <Box width='min-content' ml={2}>
                 <ContentIndicator 
                 leftIcon={<IndicatorLeft />}

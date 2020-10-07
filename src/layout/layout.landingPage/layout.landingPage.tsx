@@ -54,7 +54,7 @@ const LayoutLandingPage = (props:IProps) => {
             </Grid>
             {/* expand icon */}
             <Grid item xs={12}>
-                <Box width='inherit' p={2} display='flex' justifyContent='center' alignItems='center'>
+                <Box p={2} display='flex' justifyContent='center' alignItems='center'>
                     <Box 
                     className={classes.expandIcon} 
                     width='40px' 
@@ -69,20 +69,20 @@ const LayoutLandingPage = (props:IProps) => {
             </Grid>
             {/* detail title */}
             <Grid item xs={12}>
-                <Box width='inherit' pt={8} display='flex' flexDirection='column' alignItems='flex-start'>
+                <Box pt={8} display='flex' flexDirection='column' alignItems='flex-start'>
                 {detailSubtitle}
                 {detailTitle}
                 </Box>
             </Grid>
             {/* tabs */}
             <Grid item xs={12}>
-                <Box className={classes.detailTabs} width='inherit' mt={8} mb={3} >
+                <Box className={classes.detailTabs} mt={8} mb={3} >
                 {detailTabs}
                 </Box>
             </Grid>
             {/* detial page */}
             <Grid item xs={12}>
-                <Box width='inherit' height='400px'>
+                <Box height='400px'>
                     this is page corespond to each tabs
                 </Box>
             </Grid>
