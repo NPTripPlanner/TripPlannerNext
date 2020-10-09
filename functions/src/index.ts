@@ -1,6 +1,6 @@
-import * as functions from 'firebase-functions';
+import {https} from 'firebase-functions';
 import { CallableContext } from 'firebase-functions/lib/providers/https';
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 
 const adminApp = admin.initializeApp({
     projectId:'tripplanner-9563b'
@@ -61,7 +61,7 @@ interface InitUserHttpsData{
     displayName: string;
     email: string;
 }
-export const initUserHttps = functions.https.onCall(async (data:InitUserHttpsData, context:CallableContext) => {
+export const initUserHttps = https.onCall(async (data:InitUserHttpsData, context:CallableContext) => {
 
     try{
         const auth = validateAuthFromFunctionContext(context, 'Initialize user fail');
@@ -81,7 +81,7 @@ export const initUserHttps = functions.https.onCall(async (data:InitUserHttpsDat
     }
     catch(err){
         console.log(err);
-        throw new functions.https.HttpsError(err.code, err.message);
+        throw new https.HttpsError(err.code, err.message);
     }
 });
 
@@ -90,7 +90,7 @@ interface ICreateItineraryHttpsData{
     startDate:string;
     endDate:string;
 }
-export const createItineraryHttps = functions.https.onCall(
+export const createItineraryHttps = https.onCall(
     async (data:ICreateItineraryHttpsData, context:CallableContext)=>{
         try{
             const auth = validateAuthFromFunctionContext(context, 'create itinerary fail');
@@ -112,7 +112,7 @@ export const createItineraryHttps = functions.https.onCall(
         }
         catch(err){
             console.log(err);
-            throw new functions.https.HttpsError(err.code, err.message);
+            throw new https.HttpsError(err.code, err.message);
         }
     }
 );
@@ -121,7 +121,7 @@ interface IUpdateItineraryHttpsData{
     itineraryId:string;
     dataToUpdate: IUpdateItineraryData;
 }
-export const updateItineraryHttps = functions.https.onCall(
+export const updateItineraryHttps = https.onCall(
     async (data:IUpdateItineraryHttpsData, context:CallableContext)=>{
         try{
             const auth = validateAuthFromFunctionContext(context, 'update itinerary fail');
@@ -139,7 +139,7 @@ export const updateItineraryHttps = functions.https.onCall(
         }
         catch(err){
             console.log(err);
-            throw new functions.https.HttpsError(err.code, err.message);
+            throw new https.HttpsError(err.code, err.message);
         }
     }
 );
@@ -147,7 +147,7 @@ export const updateItineraryHttps = functions.https.onCall(
 interface IDeleteItineraryHttpsData{
     itineraryId:string;
 }
-export const deleteItineraryHttps = functions.https.onCall(async (
+export const deleteItineraryHttps = https.onCall(async (
     data:IDeleteItineraryHttpsData, context:CallableContext)=>{
 
     try{
@@ -160,7 +160,7 @@ export const deleteItineraryHttps = functions.https.onCall(async (
     }
     catch(err){
         console.log(err.message);
-        throw new functions.https.HttpsError(err.code, err.message);
+        throw new https.HttpsError(err.code, err.message);
     }
 });
 

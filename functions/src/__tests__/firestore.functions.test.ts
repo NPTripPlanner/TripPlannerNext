@@ -1,7 +1,7 @@
 // const test = require('firebase-functions-test')();
 import functionTest from 'firebase-functions-test';
 const test = functionTest();
-import * as firestoreFunctions from '../index';
+import {initUserHttps} from '../index';
 
 
 describe('Firestore functions test', ()=>{
@@ -18,7 +18,7 @@ describe('Firestore functions test', ()=>{
 
     describe('init user', ()=>{
         it('test init user function', async ()=>{
-            const wrapped = test.wrap(firestoreFunctions.initUserHttps);
+            const wrapped = test.wrap(initUserHttps);
             const result = await wrapped(userData);
             return expect(result).toBeTruthy();
         })
