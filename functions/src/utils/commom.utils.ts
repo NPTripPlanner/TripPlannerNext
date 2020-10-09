@@ -2,8 +2,10 @@
 // const moment = require('moment');
 
 import * as admin from 'firebase-admin';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
+import { Moment } from 'moment';
 import { MomentInput } from 'moment';
+import { IDateTimeObject } from './types';
 
 /**
  * Get current date time in UTC
@@ -18,7 +20,7 @@ export const getNowUTC = () : Date =>{
 
 /**
  * Convert date to UTC 
- * @param date moment date
+ * @param date MomentInput
  * 
  * @return js Date
  */
@@ -29,17 +31,17 @@ export const convertToUTC = (date:MomentInput) : Date =>{
 
 /**
  * Add create date to object
- * @param object js object
- * @param createDate moment date if null then UTC date will be used
+ * @param object js object if null current date will provide
+ * @param createDate js Date
  * 
  * @return js object with createAt as property and Firebase timestamp as value
  */
-export const addCreateDateToObject = <T extends {}>(object:T, createDate:MomentInput=null) : T =>{
+export const addCreateDateToObject = <T extends IDateTimeObject>(object:T, createDate:Date|null = null) : T =>{
     let cDate = admin.firestore.Timestamp.fromDate(getNowUTC());
     if(createDate){
         cDate = admin.firestore.Timestamp.fromDate(convertToUTC(createDate));
     }
-    object['createAt'] = cDate;
+    object.createAt = cDate;
     return object;
 }
 
@@ -50,12 +52,12 @@ export const addCreateDateToObject = <T extends {}>(object:T, createDate:MomentI
  * 
  * @return js object with modifyAt as property and Firebase timestamp as value
  */
-export const addModifyDateToObject = <T extends {}>(object:T, modifyDate:MomentInput=null) : T =>{
+export const addModifyDateToObject = <T extends IDateTimeObject>(object:T, modifyDate:Date|null=null) : T =>{
     let mDate = admin.firestore.Timestamp.fromDate(getNowUTC());
     if(modifyDate){
         mDate = admin.firestore.Timestamp.fromDate(convertToUTC(modifyDate));
     }
-    object['modifyAt'] = mDate;
+    object.modifyAt = mDate;
     return object;
 }
 
@@ -88,7 +90,7 @@ export const getTagsfromName = (name:string, splitBy:string=' ') : string[]=>{
  * 
  * @return moment object
  */
-export const convertLocalToUTC = (datetime:MomentInput) : Moment=>{
+export const convertLocalToUTC = (datetime:string) : Moment=>{
     const convertUTC = moment.utc(datetime);
     return convertUTC;
 }

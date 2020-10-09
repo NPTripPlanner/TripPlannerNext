@@ -2,14 +2,15 @@
 // const commonUtils = require('./commom.utils');
 
 import {firestore} from './utils';
-import {addCreateDateToObject, addModifyDateToObject} from './commom.utils';
 import { WriteBatch } from '@google-cloud/firestore';
+import User from '../models/userDoc';
+import UserItinerary from '../models/userItineraryDoc';
+import colNames from './firestoreColNames';
 
-
-export interface IUserData{
-   id: string;
-   displayName: string;
-   email:string;
+export interface ICreateUserData {
+    id:string;
+    email:string;
+    displayName:string;
 }
 /**
  * Create new user in firestore
@@ -22,21 +23,20 @@ export interface IUserData{
  * 
  * @return string of user id
  */
-export const createUserWith = async (userData:IUserData, writeHandler:WriteBatch) : Promise<string>=>{
+export const createUser = async (userData:ICreateUserData, writeHandler:WriteBatch) : Promise<string>=>{
     if(!userData) throw Error('User data was not given');
 
-    let user : IUserData = {
-        id: userData.id,
-        displayName: userData.displayName,
-        email: userData.email,
-    };
-    user = addCreateDateToObject(user);
-    user = addModifyDateToObject(user);
 
-    const userDocRef = await firestore.collection('users').doc(user.id);
+    const newUserDoc = new User(userData.id, userData.email, userData.displayName);
+    const newUserItDoc = new UserItinerary(userData.id, 0);
 
-    writeHandler.create(userDocRef, user);
+    const userDocRef = await firestore.collection(colNames.users.identifier).doc(userData.id);
+    const userItineraryDocRef = await firestore.collection(colNames.userItineraries.identifier)
+    .doc(userData.id);
 
-    return user.id;
+    writeHandler.create(userDocRef, newUserDoc.toFirestore());
+    writeHandler.create(userItineraryDocRef, newUserItDoc.toFirestore());
+
+    return userData.id;
 }
 

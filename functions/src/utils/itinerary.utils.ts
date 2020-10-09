@@ -1,11 +1,20 @@
-const firestore = require('./utils').firestore();
-const commonUtils = require('./commom.utils');
-const moment = require('moment');
+// const firestore = require('./utils').firestore();
+// const commonUtils = require('./commom.utils');
+// const moment = require('moment');
+
+import { convertLocalToUTC, convertToServerTimestamp, getTotalDays } from './commom.utils';
+import {deleteDocuments, firestore, getAllDocumentsPathUnder} from './utils';
+import moment from 'moment';
+import { WriteBatch } from '@google-cloud/firestore';
+import { UserItineraryConverter } from '../models/userItineraryDoc';
+import Itinerary, { ItineraryConverter } from '../models/itineraryDoc';
+import colNames from './firestoreColNames';
+
 
 /**
- * Create a itinerary under a trip archive
+ * Create a new itinerary
  * 
- * @param {*} archiveId trip archive id
+ * @param {*} userId user id you want to create itinerary under
  * @param {*} itineraryName name for itinerary, if null then default name will be used
  * @param {*} startDateLocal string of start date for itinerary.
  * 
@@ -23,29 +32,34 @@ const moment = require('moment');
  * 
  * If startDateLocal was null then this will set to 1 day after startDateLocal
  * 
- * @param {*} writeHandler a handler for write. 
+ * @param {*} writeHandler Firestore WriteBatch. 
  * 
  * accept transaction, batch or writebulk
  * 
  * @returns return itinerary id
  */
-exports.createItineraryForTripArchive = async (
-    archiveId,
-    itineraryName,
-    startDateLocal,//e.g 2013-02-04T10:35:24-08:00
-    endDateLocal,//e.g 2013-02-04T10:35:24-08:00
-    writeHandler
-    )=>{
+export const createItinerary = async (
+    userId:string,
+    itineraryName:string,
+    startDateLocal:string,//e.g 2013-02-04T10:35:24-08:00
+    endDateLocal:string,//e.g 2013-02-04T10:35:24-08:00
+    writeHandler:WriteBatch
+    ) : Promise<string> =>{
 
-    if(!archiveId) throw Error('Archive id was not given');
+    if(!userId) throw Error('User id is required');
+    if(!itineraryName) throw Error('Itinerary name is required');
 
-    //check if archive do exists
-    const archiveDocRef = await firestore.collection('tripArchive').doc(archiveId);
-    const archiveFileExists = await (await archiveDocRef.get()).exists;
-    if(!archiveFileExists) throw new Error(`Given archive id ${archiveId} do not exist`);
+    //check if userItinerary document exists
+    const userItDocRef = await firestore.collection(colNames.userItineraries.identifier).doc(userId)
+    .withConverter(UserItineraryConverter);
 
-    //get a new ref for itinerary
-    const itDocRef = archiveDocRef.collection('itineraries').doc();
+    const userItSnapshot = await userItDocRef.get();
+    if(!userItSnapshot.exists) throw new Error(`User ${userId} do not have itinerary document created`);
+
+    //get a new reference in firestore for itinerary
+    const newItineraryDocRef = userItDocRef.collection(colNames.userItineraries.itineraries.identifier).doc();
+
+    //////////start converting time to server timestamp//////////
 
     let defaultStartDateLocal = startDateLocal;
     let defaultEndDateLocal = endDateLocal;
@@ -59,83 +73,94 @@ exports.createItineraryForTripArchive = async (
     }
 
     //convert time to UTC
-    let startDateUTC = commonUtils.convertLocalToUTC(defaultStartDateLocal);
-    let endDateUTC = commonUtils.convertLocalToUTC(defaultEndDateLocal);
+    let startDateUTC = convertLocalToUTC(defaultStartDateLocal);
+    let endDateUTC = convertLocalToUTC(defaultEndDateLocal);
 
     //different days between start to end date
-    const totalDays = commonUtils.getTotalDays(startDateUTC, endDateUTC);
+    const totalDays = getTotalDays(startDateUTC, endDateUTC);
 
     //convert to server timestamp
-    startDateUTCTS = commonUtils.convertToServerTimestamp(startDateUTC.toDate());
-    endDateUTCTS = commonUtils.convertToServerTimestamp(endDateUTC.toDate());
+    const startDateUTCTS = convertToServerTimestamp(startDateUTC.toDate());
+    const endDateUTCTS = convertToServerTimestamp(endDateUTC.toDate());
 
-    //transform data
-    let itinerarydata = {
-        id: itDocRef.id,
-        name: itineraryName?itineraryName:'First itinerary', 
-        startDateUTC: startDateUTCTS,
-        endDateUTC: endDateUTCTS,
-        totalDays,
-        tripArchiveId: archiveId,
-    };
-    itinerarydata = commonUtils.addCreateDateToObject(itinerarydata);
-    itinerarydata = commonUtils.addModifyDateToObject(itinerarydata);
+    //////////end converting time to server timestamp//////////
 
-    writeHandler.create(itDocRef, itinerarydata);
+    //create new itinerary model
+    const newIt = new Itinerary(newItineraryDocRef.id, itineraryName, startDateUTCTS, endDateUTCTS, totalDays);
 
-    return itinerarydata.id;
+    writeHandler.create(newItineraryDocRef, newIt.toFirestore());
+    //TODO: update userItinerary totalItineraries
+
+    return newItineraryDocRef.id;
+}
+
+export interface IUpdateItineraryData{
+    name?:string;
+    startDate?:string;
+    endDate?:string;
 }
 
 /**
  * Update itinerary data
- * @param {*} tripArchiveDocRef the ref of trip archive this itinerary stored under 
+ * @param {*} userId user id you want to create itinerary under
  * @param {*} itineraryId itinerary id
- * @param {*} dataToUpdate data to update
+ * @param {*} dataToUpdate field of data to update. IUpdateItineraryData
  * 
  * shape:
- * {name, startDate, endDate} startDate and endDate are string in local time
+ * {name, startDate, endDate} startDate and endDate are string in local time 
  * 
- * @param {*} writeHandler a handler for write
+ * if any field is undifined or null will be ignored
  * 
- * accept transaction, batch or writebulk
+ * @param {*} writeHandler WriteBatch
+ * 
+ * @return true if nothing went wrong
  */
-exports.updateItineraryData = async (tripArchiveDocRef, itineraryId, dataToUpdate, writeHandler)=>{
-    const itinerariesRef = await tripArchiveDocRef.collection('itineraries');
-    const itDocRef = await itinerariesRef.doc(`${itineraryId}`);
-    const docSnapshot = await itDocRef.get();
+export const updateItinerary = async (
+    userId:string, itineraryId:string, 
+    dataToUpdate:IUpdateItineraryData, writeHandler:WriteBatch): Promise<boolean>=>{
 
-    if(!docSnapshot.exists) throw new Error(`Itinerary ${itineraryId} do not exists`);
+    const colPath = `${colNames.userItineraries.identifier}/${userId}/${colNames.userItineraries.itineraries.identifier}`;
+    const itDocRef = await firestore.collection(colPath).doc(itineraryId).withConverter(ItineraryConverter);
+    const itSnapshot = await itDocRef.get();
+
+    if(!itSnapshot.exists) throw new Error(`Itinerary ${itineraryId} do not exists`);
 
     const {name, startDate, endDate} = dataToUpdate;
 
-    let updatedData = {};
+    let data : FirebaseFirestore.UpdateData = {};
 
-    if(name) updatedData = {...updatedData, name};
+    if(name) data = {...data, name};
 
     //update startDate, endDate and totalDays
     if(startDate && endDate){
         //convert time to UTC
-        let startDateUTC = commonUtils.convertLocalToUTC(startDate);
-        let endDateUTC = commonUtils.convertLocalToUTC(endDate);
+        let startDateUTC = convertLocalToUTC(startDate);
+        let endDateUTC = convertLocalToUTC(endDate);
 
         //different days between start to end date
-        const totalDays = commonUtils.getTotalDays(startDateUTC, endDateUTC);
+        const totalDays = getTotalDays(startDateUTC, endDateUTC);
 
         //convert to server timestamp
-        startDateUTCTS = commonUtils.convertToServerTimestamp(startDateUTC.toDate());
-        endDateUTCTS = commonUtils.convertToServerTimestamp(endDateUTC.toDate());
+        const startDateUTCTS = convertToServerTimestamp(startDateUTC.toDate());
+        const endDateUTCTS = convertToServerTimestamp(endDateUTC.toDate());
 
-        updatedData = {
-            ...updatedData,
-            startDateUTC: startDateUTCTS,
-            endDateUTC: endDateUTCTS,
-            totalDays,
-        };
+        data = {...data, startDateUTCTS, endDateUTCTS, totalDays};
     }
 
-    itinerarydata = commonUtils.addModifyDateToObject(updatedData);
+    writeHandler.update(itSnapshot.ref, data);
 
-    writeHandler.update(docSnapshot.ref, updatedData);
+    return true;
+}
 
+export const deleteItinerary = async (userId:string, itineraryId:string)=>{
+
+    const colPath = `${colNames.userItineraries.identifier}/${userId}/${colNames.userItineraries.itineraries.identifier}`;
+    const itDocRef = await firestore.collection(colPath).doc(itineraryId).withConverter(ItineraryConverter);
+    const itSnapshot = await itDocRef.get();
+
+    if(!itSnapshot.exists) throw new Error(`Itinerary ${itineraryId} do not exists`);
+
+    const allDocRefs = await getAllDocumentsPathUnder(itDocRef);
+    await deleteDocuments(allDocRefs);
     return true;
 }

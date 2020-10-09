@@ -1,7 +1,5 @@
 import * as functions from 'firebase-functions';
 import { CallableContext } from 'firebase-functions/lib/providers/https';
-// const functions = require('firebase-functions');
-// const admin = require('firebase-admin');
 import * as admin from 'firebase-admin';
 
 const adminApp = admin.initializeApp({
@@ -10,20 +8,13 @@ const adminApp = admin.initializeApp({
 const firestore = adminApp.firestore();
 
 import {initUtils} from './utils/utils';
-import { IUserData } from './utils/user.utils';
 initUtils(adminApp);
 
 
+import {createUser} from './utils/user.utils';
+import {createItinerary, deleteItinerary, IUpdateItineraryData, updateItinerary} from './utils/itinerary.utils';
 
-
-// const utils = require('./utils/utils');
-// utils.init(adminApp);
-const trip = require('./utils/trip.utils');
-const user = require('./utils/user.utils');
-const itinerary = require('./utils/itinerary.utils');
-const trigger = require('./utils/trigger.utils');
-
-const mockAuth = require('./mock/mock.auth');
+import {mockFirebaseAuth, TestAuth} from './__tests__/mock/mock.auth';
 
 const env = process.env.NODE_ENV;
 
@@ -40,59 +31,51 @@ class ValidateError extends Error{
     }
 }
 
-function validateAuthFromFunctionContext(context:CallableContext,  errorMsg:string=''){
+type Auth = {
+    uid: string;
+    token: admin.auth.DecodedIdToken;
+};
+
+function validateAuthFromFunctionContext(context:CallableContext,  errorMsg:string=''):Auth|TestAuth{
 
     if (env==='test') {
       console.log("Authentication is mocked for integration testing");
-      return mockAuth.mockFirebaseAuth;
+      return mockFirebaseAuth;
     }
-    if(context.auth) return context.auth
+
+    if(context.auth){
+        if(context.auth.uid){
+            return {
+                uid: context.auth.uid,
+                token: context.auth.token,
+            };
+        }
+        throw new ValidateError('cloud-function/uid', errorMsg);
+    }
 
     throw new ValidateError('cloud-function/unauthorized', errorMsg);
 }
 
-/**
- * data: {
- *          id: string
-            displayName: string,
-            email: string,
- * }
- */
-exports.initUser = functions.https.onCall(async (data:IUserData, context:CallableContext) => {
+
+interface InitUserHttpsData{
+    displayName: string;
+    email: string;
+}
+export const initUserHttps = functions.https.onCall(async (data:InitUserHttpsData, context:CallableContext) => {
 
     try{
-        validateAuthFromFunctionContext(context, 'Initialize user fail');
+        const auth = validateAuthFromFunctionContext(context, 'Initialize user fail');
+        const userId = auth?.uid;
 
         const userBatch = firestore.batch();
         //create a new user
-        const userId = await user.createUserWith(data, userBatch);
-        //create a new trip archive
-        const archiveId = await trip.createTripArchiveWith(userId, null, userBatch);
+        await createUser({
+            id:userId,
+            email:data.email,
+            displayName:data.displayName,
+        }, userBatch);
         
         await userBatch.commit();
-
-        //transfer trip archive to user
-        await firestore.runTransaction(async (trans)=>{
-            return await trip.transferTripArchiveTo(userId, archiveId, trans);
-        })
-
-        //uncomment to create 50 trip archives for test
-        // for(let i=0; i<50; i++){
-        //     const batch = firestore.batch();
-        //     const archiveIdd = await trip.createTripArchiveWith(userId, `archive ${i}`, batch);
-        //     await batch.commit();
-
-        //     //transfer trip archive to user
-        //     await firestore.runTransaction(async (trans)=>{
-        //         return await trip.transferTripArchiveTo(userId, archiveIdd, trans);
-        //     })
-        // }
-    
-        //test
-        // const itBatch = firestore.batch();
-        // //create trip under a trip archive
-        // await itinerary.createItineraryForTripArchive(archiveId, null, null, null, itBatch);
-        // await itBatch.commit();
         
         return true;
     }
@@ -102,105 +85,29 @@ exports.initUser = functions.https.onCall(async (data:IUserData, context:Callabl
     }
 });
 
-exports.createTripArchive = functions.https.onCall(async (data, context)=>{
-
-    try{
-        validateAuthFromFunctionContext(context, 'Create trip archive fail');
-
-        const {userId, name} = data;
-
-        const archiveBatch = firestore.batch();
-        const archiveId = await trip.createTripArchiveWith(userId, name, archiveBatch);
-        await archiveBatch.commit();
-
-        //transfer trip archive to user
-        await firestore.runTransaction(async (trans)=>{
-            return await trip.transferTripArchiveTo(userId, archiveId, trans);
-        });
-
-        //uncomment to create a dummy trip template
-        // const tripBatch = firestore.batch();
-        // for(let i=0; i<15; i++){
-        // //TODO:create trip template
-        // let tripData = {
-        //     tripName:'My first trip',
-        // }
-        // tripData = commonUtils.addCreateDateToObject(tripData);
-        // tripData = commonUtils.addModifyDateToObject(tripData);
-        // //create trip under a trip archive
-        // await trip.createTripUnderArchiveWith(archiveId, tripData, tripBatch);
-        // }
-        // await tripBatch.commit();
-
-        const retData = {
-            id: archiveId,
-            ownerId: userId,
-        };
-
-        return retData;
-    }
-    catch(err){
-        console.log(err);
-        throw new functions.https.HttpsError(err.code, err.message);
-    }
-});
-
-exports.deleteTripArchive = functions.https.onCall(async (data, context)=>{
-    try{
-        validateAuthFromFunctionContext(context, 'Delete trip archive fail');
-
-        const {userId, tripArchiveId} = data;
-        const docRef = await firestore.collection('tripArchive').doc(tripArchiveId);
-        const docSnapshot = await docRef.get();
-        if(!docSnapshot.exists){
-            throw new Error(`Trip archive ${tripArchiveId} do not exists`);
-        }
-        if(docSnapshot.data().ownerId !== userId){
-            throw new Error(`${tripArchiveId}'s ownerId do not match ${userId}`);
-        }
-
-        const allDocRefs = await utils.getAllDocumentsPathUnder(docRef);
-        await utils.deleteDocuments(allDocRefs);
-        return true;
-    }
-    catch(err){
-        console.log(err.message);
-        throw new functions.https.HttpsError(err.code, err.message);
-    }
-});
-
-exports.updateTripArchiveName = functions.https.onCall(async (data, context)=>{
-    try{
-        validateAuthFromFunctionContext(context, 'update trip archive name fail');
-
-        const {userId, tripArchiveId, name} = data;
-
-        const result = await firestore.runTransaction(async (trans)=>{
-            return await trip.updateTripArchiveName(userId, tripArchiveId, name, trans);
-        });
-
-        return result;
-    }
-    catch(err){
-        console.log(err);
-        throw new functions.https.HttpsError(err.code, err.message);
-    }
-});
-
-exports.createItineraryForTripArchive = functions.https.onCall(
-    async (data, context)=>{
+interface ICreateItineraryHttpsData{
+    name:string;
+    startDate:string;
+    endDate:string;
+}
+export const createItineraryHttps = functions.https.onCall(
+    async (data:ICreateItineraryHttpsData, context:CallableContext)=>{
         try{
-            validateAuthFromFunctionContext(context, 'create itinerary fail');
-    
-            const {tripArchiveId, name, startDate, endDate} = data;
-            const itId = await firestore.runTransaction(async (trans)=>{
-                return await itinerary.createItineraryForTripArchive(
-                    tripArchiveId, name, startDate, endDate, trans);
-            });
+            const auth = validateAuthFromFunctionContext(context, 'create itinerary fail');
+            const userId = auth.uid;
+
+            const {name, startDate, endDate} = data;
+
+            if(!userId) throw new Error(`Missing user id`);
+
+            const batch = firestore.batch();
+
+            const itId = await createItinerary(userId, name, startDate, endDate, batch);
+
+            await batch.commit();
 
             return {
                 id: itId,
-                tripArchiveId,
             }
         }
         catch(err){
@@ -210,25 +117,23 @@ exports.createItineraryForTripArchive = functions.https.onCall(
     }
 );
 
-exports.updateItinerary = functions.https.onCall(
-    async (data, context)=>{
+interface IUpdateItineraryHttpsData{
+    itineraryId:string;
+    dataToUpdate: IUpdateItineraryData;
+}
+export const updateItineraryHttps = functions.https.onCall(
+    async (data:IUpdateItineraryHttpsData, context:CallableContext)=>{
         try{
-            validateAuthFromFunctionContext(context, 'update itinerary name fail');
+            const auth = validateAuthFromFunctionContext(context, 'update itinerary fail');
+            const userId = auth.uid;
 
-            const {userId, tripArchiveId, itineraryId, dataToUpdate} = data;
-            const tripArchiveRef = await firestore.collection('tripArchive');
-            const querySnapshots = await tripArchiveRef.where('ownerId', '==', userId)
-            .where('id', '==', tripArchiveId)
-            .get();
+            const {itineraryId, dataToUpdate} = data;
 
-            const tripArchiveDocSnap = querySnapshots.docs[0];
-            if(!tripArchiveDocSnap.exists) throw new Error(`TripArchive ${tripArchiveId} do not exists`);
+            const batch = firestore.batch();
 
-            const result = await firestore.runTransaction(async (trans)=>{
-                return await itinerary.updateItineraryData(
-                    tripArchiveDocSnap.ref, itineraryId, dataToUpdate, trans);
-            });
+            const result = await updateItinerary(userId, itineraryId, dataToUpdate, batch);
 
+            await batch.commit();
             return result;
 
         }
@@ -239,27 +144,19 @@ exports.updateItinerary = functions.https.onCall(
     }
 );
 
-exports.deleteItinerary = functions.https.onCall(async (data, context)=>{
+interface IDeleteItineraryHttpsData{
+    itineraryId:string;
+}
+export const deleteItineraryHttps = functions.https.onCall(async (
+    data:IDeleteItineraryHttpsData, context:CallableContext)=>{
+
     try{
-        validateAuthFromFunctionContext(context, 'Delete trip archive fail');
+        const auth = validateAuthFromFunctionContext(context, 'Delete itinerary fail');
+        const userId = auth.uid;
 
-        const {userId, tripArchiveId, itineraryId} = data;
-        const tripArchiveRef = await firestore.collection('tripArchive');
-        const querySnapshots = await tripArchiveRef.where('ownerId', '==', userId)
-        .where('id', '==', tripArchiveId)
-        .get();
+        const result = await deleteItinerary(userId, data.itineraryId);
 
-        const tripArchiveDocSnap = querySnapshots.docs[0];
-        if(!tripArchiveDocSnap.exists) throw new Error(`TripArchive ${tripArchiveId} do not exists`);
-
-        const itineraryColRef = tripArchiveDocSnap.ref.collection('itineraries');
-        const itDocRef = itineraryColRef.doc(`${itineraryId}`);
-        const itDocSnap = await itDocRef.get();
-        if(!itDocSnap.exists) throw new Error(`Itinerary ${itineraryId} do not exists`);
-        
-        const allDocRefs = await utils.getAllDocumentsPathUnder(itDocRef);
-        await utils.deleteDocuments(allDocRefs);
-        return true;
+        return result;
     }
     catch(err){
         console.log(err.message);
