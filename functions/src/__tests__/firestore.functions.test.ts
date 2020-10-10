@@ -1,55 +1,89 @@
-// const test = require('firebase-functions-test')();
 import functionTest from 'firebase-functions-test';
+import { CallableContextOptions, WrappedFunction } from 'firebase-functions-test/lib/main';
 const test = functionTest();
-import {initUserHttps} from '../index';
+import {initUserHttps, createItineraryHttps} from '../index';
+import {mockFirebaseAuth} from './mock/mock.auth';
 
 
 describe('Firestore functions test', ()=>{
 
     const userData = {
-        id:'testId',
-        displayName:'test name',
-        email:'fake@gmail.com',
+        id: mockFirebaseAuth.uid,
+        email: mockFirebaseAuth.token.email,
+        displayName: mockFirebaseAuth.token.name,
     }
 
-    afterAll(()=>{
+    const callableContextOptions:CallableContextOptions = {
+        auth:{
+            uid:userData.id
+        }
+    }
+
+    afterAll((done)=>{
         test.cleanup();
+        done();
     })
 
-    describe('init user', ()=>{
-        it('test init user function', async ()=>{
+    describe('initUserHttps', ()=>{
+        let wrapped: WrappedFunction;
+
+        beforeAll((done)=>{
+            wrapped = test.wrap(initUserHttps);
+            done();
+        })
+
+        it('create new user', (done)=>{
+            expect(wrapped({
+                email: userData.email,
+                displayName: userData.displayName,
+            }, callableContextOptions)).resolves.toEqual(callableContextOptions.auth.uid);
+
+            done();
+        })
+
+        it('duplicate user', (done)=>{
+            expect(wrapped({
+                email: userData.email,
+                displayName: userData.displayName,
+            }, callableContextOptions)).rejects.toThrow();
+
+            done();
+        })
+
+        it('initUserHttps call fail with missing email', (done)=>{
             const wrapped = test.wrap(initUserHttps);
-            const result = await wrapped(userData);
-            return expect(result).toBeTruthy();
+            expect(wrapped({
+                // email: userData.email,
+                displayName: userData.displayName,
+            })).rejects.toThrow();
+
+            done();
         })
     })
 
-    // describe('create itinerary', ()=>{
-    //     it('test create itinerary function', async ()=>{
-    //         let wrapped = test.wrap(firestoreFunctions.createTripArchive);
-    //         const result = await wrapped({
-    //             userId: userData.id,
-    //             name:'This has 1 itineray',
-    //         });
-    //         expect(result).toMatchObject({
-    //             ownerId: userData.id,
-    //         });
+    describe('createItineraryHttps', ()=>{
+        let wrapped: WrappedFunction;
 
-    //         const startDate = new Date();
-    //         const endDate = new Date();
-    //         endDate.setDate(endDate.getDate()+5);
-    //         console.log(startDate.toLocaleDateString(), endDate.toLocaleDateString());
-    //         wrapped = test.wrap(firestoreFunctions.createItineraryForTripArchive);
-    //         const returnResut = await wrapped({
-    //             tripArchiveId: result.id,
-    //             name: 'first itinerary',
-    //             startDate: startDate.toUTCString(),
-    //             endDate: endDate.toUTCString(),
-    //         });
-    //         expect(returnResut).toBeTruthy();
-    //         return expect(returnResut.tripArchiveId).toEqual(result.id);
-    //     })
-    // })
+        beforeAll((done)=>{
+            wrapped = test.wrap(createItineraryHttps);
+            done();
+        })
+
+        it('create new itinerary', (done)=>{
+
+            const startDate = new Date();
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate()+5);
+
+            expect(wrapped({
+                name:'New itinerary',
+                startDate:startDate.toLocaleDateString(),
+                endDate:endDate.toLocaleDateString(),
+            }, callableContextOptions)).resolves.toBeTruthy();
+
+            done();
+        })
+    })
 
     // describe('update itinerary', ()=>{
     //     it('test update itinerary name and date function', async ()=>{

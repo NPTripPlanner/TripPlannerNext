@@ -36,9 +36,12 @@ export default class Itinerary extends Base implements IItineraryData{
             this.startDateUTC = startDateUTC;
             this.endDateUTC = endDateUTC;
             this.totalDays = totalDays;
+
+            this.toFirestore = this.toFirestore.bind(this);
     }
 
-    toFirestore = ():IItineraryData => {
+    toFirestore():IItineraryData{
+        
         const data:IItineraryData = {
             ...super.toFirestore(),
             name: this.name,

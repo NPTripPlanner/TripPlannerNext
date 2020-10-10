@@ -21,9 +21,12 @@ export default class UserItinerary extends Base implements IUserItineraryData{
         
         this.id = id;
         this.totalItineraries = totalItineraries;
+
+        this.toFirestore = this.toFirestore.bind(this);
     }
 
-    toFirestore = ():IUserItineraryData=>{
+    toFirestore():IUserItineraryData{
+
         const data:IUserItineraryData = {
             ...super.toFirestore(),
             totalItineraries: this.totalItineraries,

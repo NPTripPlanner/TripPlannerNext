@@ -14,7 +14,7 @@ initUtils(adminApp);
 import {createUser} from './utils/user.utils';
 import {createItinerary, deleteItinerary, IUpdateItineraryData, updateItinerary} from './utils/itinerary.utils';
 
-import {mockFirebaseAuth, TestAuth} from './__tests__/mock/mock.auth';
+// import {mockFirebaseAuth, TestAuth} from './__tests__/mock/mock.auth';
 
 const env = process.env.NODE_ENV;
 
@@ -22,25 +22,16 @@ if(process.env.NODE_ENV === 'production'){
     console.log = ()=>{}
 }
 
-class ValidateError extends Error{
-    code:string;
-
-    constructor(code:string, message:string){
-        super(message);
-        this.code = code;
-    }
-}
-
 type Auth = {
     uid: string;
     token: admin.auth.DecodedIdToken;
 };
 
-function validateAuthFromFunctionContext(context:CallableContext,  errorMsg:string=''):Auth|TestAuth{
+function validateAuthFromFunctionContext(context:CallableContext):Auth{
 
     if (env==='test') {
       console.log("Authentication is mocked for integration testing");
-      return mockFirebaseAuth;
+    //   return mockFirebaseAuth;
     }
 
     if(context.auth){
@@ -50,10 +41,10 @@ function validateAuthFromFunctionContext(context:CallableContext,  errorMsg:stri
                 token: context.auth.token,
             };
         }
-        throw new ValidateError('cloud-function/uid', errorMsg);
+        throw new https.HttpsError('unauthenticated', 'missing uid');
     }
 
-    throw new ValidateError('cloud-function/unauthorized', errorMsg);
+    throw new https.HttpsError('unauthenticated', 'not authorized');
 }
 
 
@@ -64,12 +55,12 @@ interface InitUserHttpsData{
 export const initUserHttps = https.onCall(async (data:InitUserHttpsData, context:CallableContext) => {
 
     try{
-        const auth = validateAuthFromFunctionContext(context, 'Initialize user fail');
+        const auth = validateAuthFromFunctionContext(context);
         const userId = auth?.uid;
 
         const userBatch = firestore.batch();
         //create a new user
-        await createUser({
+        const id = await createUser({
             id:userId,
             email:data.email,
             displayName:data.displayName,
@@ -77,11 +68,11 @@ export const initUserHttps = https.onCall(async (data:InitUserHttpsData, context
         
         await userBatch.commit();
         
-        return true;
+        return id;
     }
     catch(err){
-        console.log(err);
-        throw new https.HttpsError(err.code, err.message);
+        // console.log(err);
+        throw err;
     }
 });
 
@@ -93,12 +84,12 @@ interface ICreateItineraryHttpsData{
 export const createItineraryHttps = https.onCall(
     async (data:ICreateItineraryHttpsData, context:CallableContext)=>{
         try{
-            const auth = validateAuthFromFunctionContext(context, 'create itinerary fail');
+            const auth = validateAuthFromFunctionContext(context);
             const userId = auth.uid;
 
             const {name, startDate, endDate} = data;
 
-            if(!userId) throw new Error(`Missing user id`);
+            if(!userId) throw new https.HttpsError('data-loss',`Missing user id`);
 
             const batch = firestore.batch();
 
@@ -106,13 +97,11 @@ export const createItineraryHttps = https.onCall(
 
             await batch.commit();
 
-            return {
-                id: itId,
-            }
+            return itId
         }
         catch(err){
             console.log(err);
-            throw new https.HttpsError(err.code, err.message);
+            throw err;
         }
     }
 );
@@ -124,7 +113,7 @@ interface IUpdateItineraryHttpsData{
 export const updateItineraryHttps = https.onCall(
     async (data:IUpdateItineraryHttpsData, context:CallableContext)=>{
         try{
-            const auth = validateAuthFromFunctionContext(context, 'update itinerary fail');
+            const auth = validateAuthFromFunctionContext(context);
             const userId = auth.uid;
 
             const {itineraryId, dataToUpdate} = data;
@@ -151,7 +140,7 @@ export const deleteItineraryHttps = https.onCall(async (
     data:IDeleteItineraryHttpsData, context:CallableContext)=>{
 
     try{
-        const auth = validateAuthFromFunctionContext(context, 'Delete itinerary fail');
+        const auth = validateAuthFromFunctionContext(context);
         const userId = auth.uid;
 
         const result = await deleteItinerary(userId, data.itineraryId);

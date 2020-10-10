@@ -9,6 +9,8 @@ export default class Base implements IBaseData {
 
     constructor(id:string){
         this.id = id;
+
+        this.toFirestore = this.toFirestore.bind(this);
     }
 
     /**
@@ -16,7 +18,8 @@ export default class Base implements IBaseData {
      * 
      * Subclass override must call super
      */
-    toFirestore = ():IBaseData => {
+    toFirestore():IBaseData{
+        
         const data:IBaseData = {
             id: this.id,
         }

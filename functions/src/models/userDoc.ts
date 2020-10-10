@@ -10,10 +10,11 @@ export interface IUserData extends IBaseData {
     email:string;
 }
 
+const ExtensibleBase = class extends Base{};
 /**
  * Model for user document
  */
-export default class User extends Base implements IUserData{
+export default class User extends ExtensibleBase implements IUserData{
 
     displayName:string = '';
     email:string = '';
@@ -23,9 +24,12 @@ export default class User extends Base implements IUserData{
 
         this.email = email;
         this.displayName = displayName;
+
+        this.toFirestore = this.toFirestore.bind(this);
     }
 
-    toFirestore = ():IUserData => {
+    toFirestore():IUserData{
+
         const data:IUserData = {
             ...super.toFirestore(),
             displayName: this.displayName,

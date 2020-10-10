@@ -9,6 +9,7 @@ import { WriteBatch } from '@google-cloud/firestore';
 import { UserItineraryConverter } from '../models/userItineraryDoc';
 import Itinerary, { ItineraryConverter } from '../models/itineraryDoc';
 import colNames from './firestoreColNames';
+import { https } from 'firebase-functions';
 
 
 /**
@@ -46,15 +47,15 @@ export const createItinerary = async (
     writeHandler:WriteBatch
     ) : Promise<string> =>{
 
-    if(!userId) throw Error('User id is required');
-    if(!itineraryName) throw Error('Itinerary name is required');
+    if(!userId) throw new https.HttpsError('data-loss','User id is required');
+    if(!itineraryName) throw new https.HttpsError('data-loss','Itinerary name is required');
 
     //check if userItinerary document exists
     const userItDocRef = await firestore.collection(colNames.userItineraries.identifier).doc(userId)
     .withConverter(UserItineraryConverter);
-
+    
     const userItSnapshot = await userItDocRef.get();
-    if(!userItSnapshot.exists) throw new Error(`User ${userId} do not have itinerary document created`);
+    if(!userItSnapshot.exists) throw new https.HttpsError('not-found',`User ${userId} do not have itinerary document created`);
 
     //get a new reference in firestore for itinerary
     const newItineraryDocRef = userItDocRef.collection(colNames.userItineraries.itineraries.identifier).doc();
@@ -69,7 +70,7 @@ export const createItinerary = async (
         defaultEndDateLocal = moment.utc().add(1, 'days').format();
     }
     else if(!defaultEndDateLocal){
-        throw new Error('startDateLocal was given but endDateLocal was not');
+        throw new https.HttpsError('failed-precondition','startDateLocal was given but endDateLocal was not');
     }
 
     //convert time to UTC
@@ -89,7 +90,6 @@ export const createItinerary = async (
     const newIt = new Itinerary(newItineraryDocRef.id, itineraryName, startDateUTCTS, endDateUTCTS, totalDays);
 
     writeHandler.create(newItineraryDocRef, newIt.toFirestore());
-    //TODO: update userItinerary totalItineraries
 
     return newItineraryDocRef.id;
 }
