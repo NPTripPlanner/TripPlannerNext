@@ -49,9 +49,9 @@ export async function createItinerary(
     if(!itineraryName) throw new https.HttpsError('data-loss','Itinerary name is required');
 
     //check if userItinerary document exists
-    const userItDocRef = await firestore.collection(colNames.userItineraries.identifier).doc(userId)
+    const userItDocRef = await firestore.collection('userItineraries').doc(userId)
     .withConverter(UserItineraryConverter);
-    
+
     const userItSnapshot = await userItDocRef.get();
     if(!userItSnapshot.exists) throw new https.HttpsError('not-found',`User ${userId} do not have itinerary document created`);
 
@@ -89,6 +89,14 @@ export async function createItinerary(
 
     const batch = firestore.batch();
     batch.create(newItineraryDocRef, newIt.toFirestore());
+
+    //add one itinerary count to user itineraries
+    const userIt = userItSnapshot.data();
+    if(userIt){
+        userIt.totalItineraries += 1;
+        batch.update(userItSnapshot.ref, userIt?.toFirestore());
+    }
+    
     await batch.commit();
 
     return newItineraryDocRef.id;

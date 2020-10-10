@@ -94,7 +94,7 @@ export function getTagsfromName(name:string, splitBy:string=' ') : string[]{
  * 
  * @return moment object
  */
-export function convertLocalToUTC(datetime:string) : Moment{
+export function convertLocalToUTC(datetime:MomentInput) : Moment{
     const convertUTC = moment.utc(datetime);
     return convertUTC;
 }

@@ -3,8 +3,8 @@ import { CallableContext } from 'firebase-functions/lib/providers/https';
 import admin from 'firebase-admin';
 
 const adminApp = admin.initializeApp({
-    projectId:'tripplanner-9563b'
-})
+    projectId:"tripplanner-9563b"
+});
 const firestore = adminApp.firestore();
 
 import {createUser} from './utils/user.utils';

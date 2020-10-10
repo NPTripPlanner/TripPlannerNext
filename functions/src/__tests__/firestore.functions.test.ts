@@ -2,7 +2,7 @@ const test = require('firebase-functions-test')();
 // import functionTest from 'firebase-functions-test';
 import { CallableContextOptions, WrappedFunction } from 'firebase-functions-test/lib/main';
 // const test = functionTest();
-import {initUserHttps, createItineraryHttps} from '../src/index';
+import {initUserHttps, createItineraryHttps} from '../index';
 import {mockFirebaseAuth} from './mock/mock.auth';
 
 
@@ -33,32 +33,35 @@ describe('Firestore functions test', ()=>{
             done();
         })
 
-        it('create new user', (done)=>{
-            expect(wrapped({
+        it('create new user', async ()=>{
+
+            await expect(wrapped({
                 email: userData.email,
                 displayName: userData.displayName,
-            }, callableContextOptions)).resolves.toEqual(callableContextOptions.auth.uid);
-
-            done();
+            }, callableContextOptions))
+            .resolves
+            .toEqual(userData.id);
         })
 
-        it('duplicate user', (done)=>{
-            expect(wrapped({
+        it('duplicate user', async ()=>{
+
+            await expect(wrapped({
                 email: userData.email,
                 displayName: userData.displayName,
-            }, callableContextOptions)).rejects.toThrow();
-
-            done();
+            }, callableContextOptions))
+            .rejects
+            .toThrow();
         })
 
-        it('initUserHttps call fail with missing email', (done)=>{
-            const wrapped = test.wrap(initUserHttps);
-            expect(wrapped({
+        it('initUserHttps call fail with missing email', async()=>{
+
+            await expect(wrapped({
                 // email: userData.email,
                 displayName: userData.displayName,
-            })).rejects.toThrow();
+            }, callableContextOptions))
+            .rejects
+            .toThrow();
 
-            done();
         })
     })
 
@@ -70,19 +73,26 @@ describe('Firestore functions test', ()=>{
             done();
         })
 
-        it('create new itinerary', (done)=>{
+        it('create new itinerary', async ()=>{
 
             const startDate = new Date();
             const endDate = new Date();
             endDate.setDate(endDate.getDate()+5);
 
-            expect(wrapped({
-                name:'New itinerary',
-                startDate:startDate.toLocaleDateString(),
-                endDate:endDate.toLocaleDateString(),
-            }, callableContextOptions)).resolves.toBeTruthy();
+            // const result = await wrapped({
+            //     name:'New itinerary',
+            //     startDate:startDate.toUTCString(),
+            //     endDate:endDate.toUTCString(),
+            // }, callableContextOptions);
 
-            done();
+            await expect(wrapped({
+                name:'New itinerary',
+                startDate:startDate.toUTCString(),
+                endDate:endDate.toUTCString(),
+            }, callableContextOptions))
+            .resolves
+            .toBeTruthy();
+
         })
     })
 
