@@ -1,12 +1,11 @@
 // const firestore = require('./utils').firestore();
 // const commonUtils = require('./commom.utils');
 
-import {firestore} from './utils';
-import { WriteBatch } from '@google-cloud/firestore';
 import User from '../models/userDoc';
 import UserItinerary from '../models/userItineraryDoc';
 import colNames from './firestoreColNames';
 import { https } from 'firebase-functions';
+import { Firestore } from '@google-cloud/firestore';
 
 export interface ICreateUserData {
     id:string;
@@ -21,11 +20,10 @@ export interface ICreateUserData {
  * 
  * In production need to automatically create user when new user account created
  * @param userData user data
- * @param writeHandler Firestore's WriteBatch
  * 
  * @return string of user id
  */
-export const createUser = async (userData:ICreateUserData, writeHandler:WriteBatch) : Promise<string>=>{
+export async function createUser(firestore:Firestore, userData:ICreateUserData) : Promise<string>{
 
     if(!userData) throw new https.HttpsError('data-loss','User data was not given');
 
@@ -41,8 +39,10 @@ export const createUser = async (userData:ICreateUserData, writeHandler:WriteBat
     const userItineraryDocRef = await firestore.collection(colNames.userItineraries.identifier)
     .doc(userData.id);
 
-    writeHandler.create(userDocRef, newUserDoc.toFirestore());
-    writeHandler.create(userItineraryDocRef, newUserItDoc.toFirestore());
+    const batch = firestore.batch();
+    batch.create(userDocRef, newUserDoc.toFirestore());
+    batch.create(userItineraryDocRef, newUserItDoc.toFirestore());
+    await batch.commit();
 
     return userData.id;
 }

@@ -1,7 +1,8 @@
-import functionTest from 'firebase-functions-test';
+const test = require('firebase-functions-test')();
+// import functionTest from 'firebase-functions-test';
 import { CallableContextOptions, WrappedFunction } from 'firebase-functions-test/lib/main';
-const test = functionTest();
-import {initUserHttps, createItineraryHttps} from '../index';
+// const test = functionTest();
+import {initUserHttps, createItineraryHttps} from '../src/index';
 import {mockFirebaseAuth} from './mock/mock.auth';
 
 

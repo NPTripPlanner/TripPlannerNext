@@ -1,4 +1,4 @@
-import { DocumentData } from "@google-cloud/firestore";
+import { DocumentData, FirestoreDataConverter } from "@google-cloud/firestore";
 import { QueryDocumentSnapshot } from "firebase-functions/lib/providers/firestore";
 import Base, { IBaseData } from "./base";
 
@@ -36,7 +36,7 @@ export default class UserItinerary extends Base implements IUserItineraryData{
     
 }
 
-export const UserItineraryConverter = { 
+export const UserItineraryConverter:FirestoreDataConverter<UserItinerary> = { 
     toFirestore(userIt:UserItinerary) : DocumentData{
         return userIt.toFirestore();
     },

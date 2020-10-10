@@ -36,7 +36,9 @@ export const convertToUTC = (date:MomentInput) : Date =>{
  * 
  * @return js object with createAt as property and Firebase timestamp as value
  */
-export const addCreateDateToObject = <T extends IDateTimeObject>(object:T, createDate:Date|null = null) : T =>{
+export function addCreateDateToObject <T extends IDateTimeObject>(
+    object:T, createDate:Date|null = null) : T {
+
     let cDate = admin.firestore.Timestamp.fromDate(getNowUTC());
     if(createDate){
         cDate = admin.firestore.Timestamp.fromDate(convertToUTC(createDate));
@@ -52,7 +54,9 @@ export const addCreateDateToObject = <T extends IDateTimeObject>(object:T, creat
  * 
  * @return js object with modifyAt as property and Firebase timestamp as value
  */
-export const addModifyDateToObject = <T extends IDateTimeObject>(object:T, modifyDate:Date|null=null) : T =>{
+export function addModifyDateToObject <T extends IDateTimeObject>(
+    object:T, modifyDate:Date|null=null) : T{
+
     let mDate = admin.firestore.Timestamp.fromDate(getNowUTC());
     if(modifyDate){
         mDate = admin.firestore.Timestamp.fromDate(convertToUTC(modifyDate));
@@ -67,7 +71,7 @@ export const addModifyDateToObject = <T extends IDateTimeObject>(object:T, modif
  * 
  * @return FirebaseFirestore Timestamp
  */
-export const convertToServerTimestamp = (date:Date) : FirebaseFirestore.Timestamp=>{
+export function convertToServerTimestamp(date:Date) : FirebaseFirestore.Timestamp{
     return admin.firestore.Timestamp.fromDate(date);
 }
 
@@ -78,7 +82,7 @@ export const convertToServerTimestamp = (date:Date) : FirebaseFirestore.Timestam
  * 
  * @return array of string
  */
-export const getTagsfromName = (name:string, splitBy:string=' ') : string[]=>{
+export function getTagsfromName(name:string, splitBy:string=' ') : string[]{
     if(!name) return [];
     const result = name.split(splitBy);
     return result?result:[];
@@ -90,7 +94,7 @@ export const getTagsfromName = (name:string, splitBy:string=' ') : string[]=>{
  * 
  * @return moment object
  */
-export const convertLocalToUTC = (datetime:string) : Moment=>{
+export function convertLocalToUTC(datetime:string) : Moment{
     const convertUTC = moment.utc(datetime);
     return convertUTC;
 }
@@ -102,7 +106,7 @@ export const convertLocalToUTC = (datetime:string) : Moment=>{
  * 
  * @returns total days in number
  */
-export const getTotalDays = (start:Moment, end:Moment) : number=>{
+export function getTotalDays(start:Moment, end:Moment) : number{
     const diffDays = end.diff(start, 'days');
     if(diffDays < 0) throw new Error('start date is after end date');
     const totalDays = diffDays + 1;

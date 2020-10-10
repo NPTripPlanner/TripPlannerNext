@@ -2,33 +2,30 @@
   "name": "functions",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
-    "build": "babel --extensions \".ts\" \"src\" --out-dir \"dist\" --source-maps",
+    "build": "rm -rf lib && tsc",
+    "local": "npm run build && firebase emulators:start",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
-    "test": "npm run build && export FIRESTORE_EMULATOR_HOST=\"localhost:8080\" && jest --detectOpenHandles \"dist/__tests__/.*\\.test\\.js\"",
+    "test": "export FIRESTORE_EMULATOR_HOST=\"localhost:8080\" && jest --detectOpenHandles \"__tests__/.*\\.test\\.ts\"",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
   "engines": {
     "node": "10"
   },
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "dependencies": {
-    "firebase-admin": "^8.10.0",
-    "firebase-functions": "^3.6.1",
+    "firebase-admin": "^9.2.0",
+    "firebase-functions": "^3.11.0",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.31"
   },
   "devDependencies": {
-    "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-proposal-throw-expressions": "^7.10.4",
-    "@babel/plugin-transform-async-to-generator": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-typescript": "^7.10.4",
+    "babel-jest": "^26.5.2",
     "firebase-functions-test": "^0.2.2",
     "jest": "^26.5.2",
     "tslint": "^5.20.1",

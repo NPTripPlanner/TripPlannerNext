@@ -7,10 +7,6 @@ const adminApp = admin.initializeApp({
 })
 const firestore = adminApp.firestore();
 
-import {initUtils} from './utils/utils';
-initUtils(adminApp);
-
-
 import {createUser} from './utils/user.utils';
 import {createItinerary, deleteItinerary, IUpdateItineraryData, updateItinerary} from './utils/itinerary.utils';
 
@@ -58,15 +54,12 @@ export const initUserHttps = https.onCall(async (data:InitUserHttpsData, context
         const auth = validateAuthFromFunctionContext(context);
         const userId = auth?.uid;
 
-        const userBatch = firestore.batch();
         //create a new user
-        const id = await createUser({
+        const id = await createUser(firestore, {
             id:userId,
             email:data.email,
             displayName:data.displayName,
-        }, userBatch);
-        
-        await userBatch.commit();
+        });
         
         return id;
     }
@@ -91,11 +84,7 @@ export const createItineraryHttps = https.onCall(
 
             if(!userId) throw new https.HttpsError('data-loss',`Missing user id`);
 
-            const batch = firestore.batch();
-
-            const itId = await createItinerary(userId, name, startDate, endDate, batch);
-
-            await batch.commit();
+            const itId = await createItinerary(firestore, userId, name, startDate, endDate)
 
             return itId
         }
@@ -118,11 +107,8 @@ export const updateItineraryHttps = https.onCall(
 
             const {itineraryId, dataToUpdate} = data;
 
-            const batch = firestore.batch();
+            const result = await updateItinerary(firestore, userId, itineraryId, dataToUpdate);
 
-            const result = await updateItinerary(userId, itineraryId, dataToUpdate, batch);
-
-            await batch.commit();
             return result;
 
         }
@@ -143,7 +129,7 @@ export const deleteItineraryHttps = https.onCall(async (
         const auth = validateAuthFromFunctionContext(context);
         const userId = auth.uid;
 
-        const result = await deleteItinerary(userId, data.itineraryId);
+        const result = await deleteItinerary(firestore, userId, data.itineraryId);
 
         return result;
     }

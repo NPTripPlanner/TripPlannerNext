@@ -3,13 +3,13 @@
 // const moment = require('moment');
 
 import { convertLocalToUTC, convertToServerTimestamp, getTotalDays } from './commom.utils';
-import {deleteDocuments, firestore, getAllDocumentsPathUnder} from './utils';
+import {deleteDocuments, getAllDocumentsPathUnder} from './utils';
 import moment from 'moment';
-import { WriteBatch } from '@google-cloud/firestore';
 import { UserItineraryConverter } from '../models/userItineraryDoc';
 import Itinerary, { ItineraryConverter } from '../models/itineraryDoc';
 import colNames from './firestoreColNames';
 import { https } from 'firebase-functions';
+import { Firestore } from '@google-cloud/firestore';
 
 
 /**
@@ -33,19 +33,17 @@ import { https } from 'firebase-functions';
  * 
  * If startDateLocal was null then this will set to 1 day after startDateLocal
  * 
- * @param {*} writeHandler Firestore WriteBatch. 
- * 
  * accept transaction, batch or writebulk
  * 
  * @returns return itinerary id
  */
-export const createItinerary = async (
+export async function createItinerary(
+    firestore:Firestore,
     userId:string,
     itineraryName:string,
     startDateLocal:string,//e.g 2013-02-04T10:35:24-08:00
-    endDateLocal:string,//e.g 2013-02-04T10:35:24-08:00
-    writeHandler:WriteBatch
-    ) : Promise<string> =>{
+    endDateLocal:string//e.g 2013-02-04T10:35:24-08:00
+    ) : Promise<string>{
 
     if(!userId) throw new https.HttpsError('data-loss','User id is required');
     if(!itineraryName) throw new https.HttpsError('data-loss','Itinerary name is required');
@@ -89,7 +87,9 @@ export const createItinerary = async (
     //create new itinerary model
     const newIt = new Itinerary(newItineraryDocRef.id, itineraryName, startDateUTCTS, endDateUTCTS, totalDays);
 
-    writeHandler.create(newItineraryDocRef, newIt.toFirestore());
+    const batch = firestore.batch();
+    batch.create(newItineraryDocRef, newIt.toFirestore());
+    await batch.commit();
 
     return newItineraryDocRef.id;
 }
@@ -111,13 +111,12 @@ export interface IUpdateItineraryData{
  * 
  * if any field is undifined or null will be ignored
  * 
- * @param {*} writeHandler WriteBatch
  * 
  * @return true if nothing went wrong
  */
-export const updateItinerary = async (
-    userId:string, itineraryId:string, 
-    dataToUpdate:IUpdateItineraryData, writeHandler:WriteBatch): Promise<boolean>=>{
+export async function updateItinerary(
+    firestore:Firestore, userId:string, itineraryId:string, 
+    dataToUpdate:IUpdateItineraryData): Promise<boolean>{
 
     const colPath = `${colNames.userItineraries.identifier}/${userId}/${colNames.userItineraries.itineraries.identifier}`;
     const itDocRef = await firestore.collection(colPath).doc(itineraryId).withConverter(ItineraryConverter);
@@ -147,12 +146,15 @@ export const updateItinerary = async (
         data = {...data, startDateUTCTS, endDateUTCTS, totalDays};
     }
 
-    writeHandler.update(itSnapshot.ref, data);
+    const batch = firestore.batch();
+    batch.update(itSnapshot.ref, data);
+    await batch.commit();
 
     return true;
 }
 
-export const deleteItinerary = async (userId:string, itineraryId:string)=>{
+export async function deleteItinerary(
+    firestore:Firestore, userId:string, itineraryId:string):Promise<boolean>{
 
     const colPath = `${colNames.userItineraries.identifier}/${userId}/${colNames.userItineraries.itineraries.identifier}`;
     const itDocRef = await firestore.collection(colPath).doc(itineraryId).withConverter(ItineraryConverter);
@@ -161,6 +163,6 @@ export const deleteItinerary = async (userId:string, itineraryId:string)=>{
     if(!itSnapshot.exists) throw new Error(`Itinerary ${itineraryId} do not exists`);
 
     const allDocRefs = await getAllDocumentsPathUnder(itDocRef);
-    await deleteDocuments(allDocRefs);
+    await deleteDocuments(firestore, allDocRefs);
     return true;
 }

@@ -1,23 +1,10 @@
-import { DocumentReference, Transaction } from "@google-cloud/firestore";
-import * as admin from "firebase-admin";
-
-let adminApp: admin.app.App;
-export let firestore: FirebaseFirestore.Firestore;
-
-/**
- * Initialize utils
- * @param app firebase admin app
- */
-export const initUtils = (app:admin.app.App) : void=>{
-    adminApp = app,
-    firestore = adminApp.firestore();
-}
+import { DocumentReference, Firestore, Transaction } from "@google-cloud/firestore";
 
 /**
  * Delete an array of document references
  * @param docRefs array of DocumentReference
  */
-export const deleteDocuments = async (docRefs:DocumentReference[]) : Promise<void> =>{
+export async function deleteDocuments(firestore:Firestore, docRefs:DocumentReference[]) : Promise<void>{
     if(!docRefs) return;
     
     const results = await firestore.runTransaction(async (trans:Transaction)=>{
@@ -42,9 +29,9 @@ export const deleteDocuments = async (docRefs:DocumentReference[]) : Promise<voi
  * 
  * @return 
  */
-export const getAllDocumentsPathUnder = async (
+export async function getAllDocumentsPathUnder(
     documentRef:DocumentReference,
-    includeSelf:boolean=true) : Promise<DocumentReference[]> =>{
+    includeSelf:boolean=true) : Promise<DocumentReference[]>{
 
     const docSnap = await documentRef.get();
     if(!docSnap.exists) throw new Error(`Document ${documentRef.id} do not exists`);
