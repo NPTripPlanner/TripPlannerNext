@@ -1,7 +1,3 @@
-// const firestore = require('./utils').firestore();
-// const commonUtils = require('./commom.utils');
-// const moment = require('moment');
-
 import { convertLocalToUTC, convertToServerTimestamp, getTotalDays } from './commom.utils';
 import {deleteDocuments, getAllDocumentsPathUnder} from './utils';
 import moment = require('moment');
