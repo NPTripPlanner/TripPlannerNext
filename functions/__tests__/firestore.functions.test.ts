@@ -1,12 +1,11 @@
 const test = require('firebase-functions-test')();
-// import functionTest from 'firebase-functions-test';
 import { CallableContextOptions, WrappedFunction } from 'firebase-functions-test/lib/main';
-// const test = functionTest();
-import {initUserHttps, createItineraryHttps} from '../index';
+import {initUserHttps, createItineraryHttps, updateItineraryHttps} from '../src/index';
 import {mockFirebaseAuth} from './mock/mock.auth';
 
 
 describe('Firestore functions test', ()=>{
+    let wrapped: WrappedFunction;
 
     const userData = {
         id: mockFirebaseAuth.uid,
@@ -26,7 +25,6 @@ describe('Firestore functions test', ()=>{
     })
 
     describe('initUserHttps', ()=>{
-        let wrapped: WrappedFunction;
 
         beforeAll((done)=>{
             wrapped = test.wrap(initUserHttps);
@@ -43,7 +41,7 @@ describe('Firestore functions test', ()=>{
             .toEqual(userData.id);
         })
 
-        it('duplicate user', async ()=>{
+        it('create duplicate user fail', async ()=>{
 
             await expect(wrapped({
                 email: userData.email,
@@ -66,24 +64,17 @@ describe('Firestore functions test', ()=>{
     })
 
     describe('createItineraryHttps', ()=>{
-        let wrapped: WrappedFunction;
 
         beforeAll((done)=>{
             wrapped = test.wrap(createItineraryHttps);
             done();
         })
 
-        it('create new itinerary', async ()=>{
+        it('create new itinerary successful', async ()=>{
 
             const startDate = new Date();
             const endDate = new Date();
             endDate.setDate(endDate.getDate()+5);
-
-            // const result = await wrapped({
-            //     name:'New itinerary',
-            //     startDate:startDate.toUTCString(),
-            //     endDate:endDate.toUTCString(),
-            // }, callableContextOptions);
 
             await expect(wrapped({
                 name:'New itinerary',
@@ -96,48 +87,65 @@ describe('Firestore functions test', ()=>{
         })
     })
 
-    // describe('update itinerary', ()=>{
-    //     it('test update itinerary name and date function', async ()=>{
-    //         let wrapped = test.wrap(firestoreFunctions.createTripArchive);
-    //         const result = await wrapped({
-    //             userId: userData.id,
-    //             name:'itinerary name will be changed',
-    //         });
-    //         expect(result).toMatchObject({
-    //             ownerId: userData.id,
-    //         });
+    describe('updateItineraryHttps', ()=>{
+        let itineraryId:string;
+        let startDate = new Date();
+        let endDate = new Date();
+        endDate.setDate(endDate.getDate()+5);
 
-    //         const startDate = new Date();
-    //         const endDate = new Date();
-    //         endDate.setDate(endDate.getDate()+5);
-    //         console.log(startDate.toLocaleDateString(), endDate.toLocaleDateString());
-    //         wrapped = test.wrap(firestoreFunctions.createItineraryForTripArchive);
-    //         const returnResut = await wrapped({
-    //             tripArchiveId: result.id,
-    //             name: 'You can not see this itinerary name',
-    //             startDate: startDate.toUTCString(),
-    //             endDate: endDate.toUTCString(),
-    //         });
-    //         expect(returnResut).toBeTruthy();
-    //         expect(returnResut.tripArchiveId).toEqual(result.id);
+        async function createFakeItinerary(){
 
-    //         wrapped = test.wrap(firestoreFunctions.updateItinerary);
-    //         const changedStartDate = new Date();
-    //         const changedEndDate = new Date();
-    //         changedEndDate.setDate(changedEndDate.getDate()+10);
-    //         const newResult = await wrapped({
-    //             userId: userData.id,
-    //             tripArchiveId: returnResut.tripArchiveId,
-    //             itineraryId: returnResut.id,
-    //             dataToUpdate: {
-    //                 name: 'name and date has been changed, total days changed from 6 to 11',
-    //                 startDate: changedStartDate.toUTCString(),
-    //                 endDate: changedEndDate.toUTCString(),
-    //             }
-    //         })
-    //         return expect(newResult).toBeTruthy();
-    //     })
-    // })
+            const itId = await test.wrap(createItineraryHttps)({
+                            name:'Change name here',
+                            startDate:startDate.toUTCString(),
+                            endDate:endDate.toUTCString(),
+                        }, callableContextOptions)
+            
+            return itId;
+        }
+
+        beforeAll(async (done)=>{
+            wrapped = test.wrap(updateItineraryHttps);
+            itineraryId = await createFakeItinerary();
+            done();
+        })
+
+        it('update itinerary successful', async ()=>{
+            const dataToUpdate = {
+                name:'New Itinerary name',
+                startDate:startDate,
+                endDate:endDate,
+            }
+            await expect(wrapped({
+             itineraryId:itineraryId,
+             dataToUpdate:dataToUpdate,
+            }, callableContextOptions)).resolves.toBeTruthy();
+        })
+
+        it('update itinerary only name', async ()=>{
+            const dataToUpdate = {
+                name:'My awesome itinerary',
+            }
+            await expect(wrapped({
+             itineraryId:itineraryId,
+             dataToUpdate:dataToUpdate,
+            }, callableContextOptions)).resolves.toBeTruthy();
+        })
+
+        it('update itinerary date', async ()=>{
+            //date from now and plus 10 days
+            endDate.setDate(endDate.getDate()+10);
+
+            const dataToUpdate = {
+                startDate:startDate,
+                endDate:endDate,
+            }
+            await expect(wrapped({
+             itineraryId:itineraryId,
+             dataToUpdate:dataToUpdate,
+            }, callableContextOptions)).resolves.toBeTruthy();
+        })
+    })
 
     // describe('delete itinerary', ()=>{
     //     it('test delete itinerary function', async ()=>{

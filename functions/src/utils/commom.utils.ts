@@ -1,8 +1,7 @@
-// const admin = require('firebase-admin');
-// const moment = require('moment');
-
 import * as admin from 'firebase-admin';
-import moment from 'moment';
+
+//https://momentjs.com/docs/#/use-it/typescript/
+import moment = require('moment');
 import { Moment } from 'moment';
 import { MomentInput } from 'moment';
 import { IDateTimeObject } from './types';

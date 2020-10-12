@@ -45,8 +45,8 @@ export async function createItinerary(
     endDateLocal:string//e.g 2013-02-04T10:35:24-08:00
     ) : Promise<string>{
 
-    if(!userId) throw new https.HttpsError('data-loss','User id is required');
-    if(!itineraryName) throw new https.HttpsError('data-loss','Itinerary name is required');
+    if(!userId) throw new https.HttpsError('invalid-argument','User id is required');
+    if(!itineraryName) throw new https.HttpsError('invalid-argument','Itinerary name is required');
 
     //check if userItinerary document exists
     const userItDocRef = await firestore.collection('userItineraries').doc(userId)
@@ -129,33 +129,38 @@ export async function updateItinerary(
     const colPath = `${colNames.userItineraries.identifier}/${userId}/${colNames.userItineraries.itineraries.identifier}`;
     const itDocRef = await firestore.collection(colPath).doc(itineraryId).withConverter(ItineraryConverter);
     const itSnapshot = await itDocRef.get();
+    const itinerary = itSnapshot.data();
 
-    if(!itSnapshot.exists) throw new Error(`Itinerary ${itineraryId} do not exists`);
+    if(!itSnapshot.exists) throw new https.HttpsError('not-found', `Itinerary ${itineraryId} do not exists`);
+    if(!itinerary) throw new https.HttpsError('not-found', `Itinerary ${itineraryId} snapshot data do not exist`);
 
     const {name, startDate, endDate} = dataToUpdate;
 
-    let data : FirebaseFirestore.UpdateData = {};
-
-    if(name) data = {...data, name};
-
     //update startDate, endDate and totalDays
+    let startDateUTCTS:FirebaseFirestore.Timestamp = itinerary.startDateUTC;
+    let endDateUTCTS:FirebaseFirestore.Timestamp = itinerary.endDateUTC;
+    let totalDays:number = itinerary.totalDays;
+
     if(startDate && endDate){
         //convert time to UTC
         let startDateUTC = convertLocalToUTC(startDate);
         let endDateUTC = convertLocalToUTC(endDate);
 
         //different days between start to end date
-        const totalDays = getTotalDays(startDateUTC, endDateUTC);
+        totalDays = getTotalDays(startDateUTC, endDateUTC);
 
         //convert to server timestamp
-        const startDateUTCTS = convertToServerTimestamp(startDateUTC.toDate());
-        const endDateUTCTS = convertToServerTimestamp(endDateUTC.toDate());
-
-        data = {...data, startDateUTCTS, endDateUTCTS, totalDays};
+        startDateUTCTS = convertToServerTimestamp(startDateUTC.toDate());
+        endDateUTCTS = convertToServerTimestamp(endDateUTC.toDate());
     }
 
+    itinerary.name = name?name:itinerary.name;
+    itinerary.startDateUTC = startDateUTCTS;
+    itinerary.endDateUTC = endDateUTCTS;
+    itinerary.totalDays = totalDays;
+
     const batch = firestore.batch();
-    batch.update(itSnapshot.ref, data);
+    batch.update(itSnapshot.ref, itinerary.toFirestore());
     await batch.commit();
 
     return true;

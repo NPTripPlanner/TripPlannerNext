@@ -29,8 +29,8 @@ export async function createUser(firestore:Firestore, userData:ICreateUserData) 
 
     const {id, email, displayName} = userData;
 
-    if(!id) throw new https.HttpsError('data-loss','user id is requried');
-    if(!email) throw new https.HttpsError('data-loss','user email is required');
+    if(!id) throw new https.HttpsError('invalid-argument','user id is requried');
+    if(!email) throw new https.HttpsError('invalid-argument','user email is required');
 
     const newUserDoc = new User(id, email, displayName);
     const newUserItDoc = new UserItinerary(userData.id, 0);
