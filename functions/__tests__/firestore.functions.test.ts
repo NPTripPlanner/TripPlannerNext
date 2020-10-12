@@ -122,7 +122,7 @@ describe('Firestore functions test', ()=>{
             }, callableContextOptions)).resolves.toBeTruthy();
         })
 
-        it('update itinerary only name', async ()=>{
+        it('update itinerary only name successful', async ()=>{
             const dataToUpdate = {
                 name:'My awesome itinerary',
             }
@@ -132,7 +132,7 @@ describe('Firestore functions test', ()=>{
             }, callableContextOptions)).resolves.toBeTruthy();
         })
 
-        it('update itinerary date', async ()=>{
+        it('update itinerary only date successful', async ()=>{
             //date from now and plus 10 days
             endDate.setDate(endDate.getDate()+10);
 
@@ -144,6 +144,20 @@ describe('Firestore functions test', ()=>{
              itineraryId:itineraryId,
              dataToUpdate:dataToUpdate,
             }, callableContextOptions)).resolves.toBeTruthy();
+        })
+
+        it('update itinerary only date fail', async ()=>{
+            //date from now and plus 10 days
+            endDate.setDate(endDate.getDate()+10);
+
+            const dataToUpdate = {
+                // startDate:startDate,
+                endDate:endDate,
+            }
+            await expect(wrapped({
+             itineraryId:itineraryId,
+             dataToUpdate:dataToUpdate,
+            }, callableContextOptions)).rejects.toThrow();
         })
     })
 

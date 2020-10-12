@@ -68,7 +68,7 @@ export async function createItinerary(
         defaultEndDateLocal = moment.utc().add(1, 'days').format();
     }
     else if(!defaultEndDateLocal){
-        throw new https.HttpsError('failed-precondition','startDateLocal was given but endDateLocal was not');
+        throw new https.HttpsError('failed-precondition','startDateLocal endDateLocal must co-exists');
     }
 
     //convert time to UTC
@@ -152,6 +152,10 @@ export async function updateItinerary(
         //convert to server timestamp
         startDateUTCTS = convertToServerTimestamp(startDateUTC.toDate());
         endDateUTCTS = convertToServerTimestamp(endDateUTC.toDate());
+    }
+    else if((!startDate && endDate) || (startDate && !endDate)){
+        throw new https.HttpsError('invalid-argument',
+        `Itinerary ${itineraryId} startDate and endDate arguments must co-exists`)
     }
 
     itinerary.name = name?name:itinerary.name;

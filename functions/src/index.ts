@@ -10,12 +10,14 @@ const firestore = adminApp.firestore();
 import {createUser} from './utils/user.utils';
 import {createItinerary, deleteItinerary, IUpdateItineraryData, updateItinerary} from './utils/itinerary.utils';
 
-// import {mockFirebaseAuth, TestAuth} from './__tests__/mock/mock.auth';
-
 const env = process.env.NODE_ENV;
 
 if(process.env.NODE_ENV === 'production'){
     console.log = ()=>{}
+}
+
+if (env==='test') {
+    console.log("Authentication is mocked for integration testing");
 }
 
 type Auth = {
@@ -25,10 +27,7 @@ type Auth = {
 
 function validateAuthFromFunctionContext(context:CallableContext):Auth{
 
-    if (env==='test') {
-      console.log("Authentication is mocked for integration testing");
-    //   return mockFirebaseAuth;
-    }
+    
 
     if(context.auth){
         if(context.auth.uid){
@@ -64,7 +63,7 @@ export const initUserHttps = https.onCall(async (data:InitUserHttpsData, context
         return id;
     }
     catch(err){
-        // console.log(err);
+        console.log('init user '+err);
         throw err;
     }
 });
@@ -89,7 +88,7 @@ export const createItineraryHttps = https.onCall(
             return itId
         }
         catch(err){
-            console.log(err);
+            console.log('create itinerary '+err);
             throw err;
         }
     }
@@ -113,7 +112,7 @@ export const updateItineraryHttps = https.onCall(
 
         }
         catch(err){
-            console.log(err);
+            console.log('update itinerary '+ err);
             throw new https.HttpsError(err.code, err.message);
         }
     }
