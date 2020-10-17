@@ -87,15 +87,25 @@ export const ClearApp = async () => {
 //#endregion App
 
 //#region User
+export interface PresentUser{
+  uid:string;
+  displayName:string;
+  email:string;
+}
 export const GetCurrentUser = () => {
-  if(process.env.NODE_ENV === 'test'){
-    return testUser;
-  }
-  return new Promise<firebase.User|null>((resolve, reject) => {
+  return new Promise<PresentUser|null>((resolve, reject) => {
+    if(process.env.NODE_ENV === 'test'){
+      return resolve(testUser);
+    }
     const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
       unsubscribe();
       if (user) {
-        resolve(user);
+        const presentUser:PresentUser = {
+          uid:user.uid,
+          displayName:user.displayName,
+          email:user.email,
+        }
+        resolve(presentUser);
       } else {
         return resolve(null);
       }
