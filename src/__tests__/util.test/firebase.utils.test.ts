@@ -1,45 +1,33 @@
+import { User } from "../../schema/firestore.schema";
 import { 
   ClearTestFirestore,
   InitFirebase, 
   // ClearApp,
-  initializeUser,
-  CreateTripArchive,
-  DeleteTripArchive,
-  // FetchTripArchive,
-  // FetchTripArchiveAfter,
-  ListenToRepository,
+  InitializeUser,
+  // ListenToRepository,
   GetRepository,
-  ListenToDocument,
-  // GetTripArchive,
-  UpdateTripArchiveName,
-  // SearchTripArchive,
+  // ListenToDocument,
   GetCollectionRef,
   GetDataByQuery,
-  ConvertSearchKeywordToArray,
-  CreateItineraryForTripArchive,
-  // UpdateItinerary,
-  DeleteItinerary,
-  ConvertRepo,
-  CreateScheduleForItinerary,
-  DeleteSchedule,
-  GetScheduls,
-  GetScheduleById,
-  UpdateSchedule,
-  UpdateItinerary
+  // ConvertSearchKeywordToArray,
+  // DeleteItinerary,
+  // ConvertRepo,
+  // CreateScheduleForItinerary,
+  // DeleteSchedule,
+  // GetScheduls,
+  // GetScheduleById,
+  // UpdateSchedule,
+  // UpdateItinerary
+  testUser,
+  CreateItinerary
 } from "../../utils/firebase/firebase.utils";
 
-import { TripArchive, Itinerary } from "../../schema/firestore.schema";
-import ImprovedRepository from "../../schema/ImprovedRepository";
-import { CloneObject } from "../../utils/utils";
+// import {Itinerary } from "../../schema/firestore.schema";
+// import ImprovedRepository from "../../schema/ImprovedRepository";
+// import { CloneObject } from "../../utils/utils";
 // import {SortArray} from './utils';
 
 describe("Firebase utility test", () => {
-
-  const fakeUser = {
-    uid:'testId',
-    displayName:'test name',
-    email:'fake@gmail.com',
-  }
 
   beforeAll(async () => {
     await ClearTestFirestore();
@@ -59,250 +47,45 @@ describe("Firebase utility test", () => {
     }
   });
   
-  describe('init user module', ()=>{
+  describe('init user suit', ()=>{
     afterAll(async (done) => {
       done();
     });
 
     it('initializeUser function', async ()=>{
-      const result = await initializeUser(fakeUser);
+      const userId = await InitializeUser(testUser.displayName, testUser.email);
 
-      return expect(result).toBeTruthy();
+      return expect(userId).toEqual(testUser.uid);
     })
   })
 
-  describe('create trip archive module', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-
-    it('CreateTripArchive() function', async ()=>{
-      expect(CreateTripArchive(fakeUser.uid, 'trip archive 1'))
-      .resolves
-      .not
-      .toThrowError();
-      
-      await CreateTripArchive(fakeUser.uid, 'trip archive 3');
-
-      const result = await CreateTripArchive(fakeUser.uid, 'trip archive 2');
-      expect(result).not.toBeNull();
-      return expect(result).toMatchObject({ownerId:fakeUser.uid});
-    })
-  })
-
-  describe('delete trip archive module', ()=>{
-    let archive;
-
-    beforeAll(async ()=>{
-      archive = await CreateTripArchive(fakeUser.uid, 'If you see this, it is a problem');
-    })
-
-    afterAll(async (done) => {
-      done();
-    });
-
-    it('DeleteTripArchive() function', async ()=>{
-
-      const deleteResult = DeleteTripArchive(fakeUser.uid, archive.id);
-      return expect(deleteResult).toBeTruthy();
-
-    })
-  })
-
-  describe('update trip archive module', ()=>{
-    const oldName = 'name will be changed';
-    const newName = 'new name';
-    let archive;
-
-    beforeAll(async ()=>{
-      archive = await CreateTripArchive(fakeUser.uid, oldName);
-    })
-
-    afterAll(async (done) => {
-      done();
-    });
-
-    it('UpdateTripArchiveName() function', async ()=>{
-      const updateResult = await UpdateTripArchiveName(fakeUser.uid, archive.id, newName);
-      return expect(updateResult.name).toEqual(newName);
-
-    })
-  })
-
-  describe('real-time listen to collection module', ()=>{
-    afterAll(async (done) => {
-      done();
-    });
-    beforeAll(()=>{
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000000;
-    })
-
-    it('ListenToRepository() function', async()=>{
-      //will use jest to spy on it
-      const cbObj ={ 
-        fn:(_docs)=>{
-          //uncomment to see log
-          // console.log('receive documents changed under collection', docs);
-        }
-      };
-      const spy = jest.spyOn(cbObj, 'fn');
-
-      //start listening to collection change
-      const unsubscribe = ListenToRepository<TripArchive, ImprovedRepository<TripArchive>>(
-        await GetRepository(TripArchive), 
-        cbObj.fn,
-        (err)=>console.log(err)
-      );
-
-      //create 2 trip archives automatically
-      const result = await new Promise((res)=>{
-        let count = 0;
-        const intval = setInterval(async ()=>{
-          await CreateTripArchive(fakeUser.uid, `Auto created trip archive ${count}`);
-          count++;
-          if(count >= 2){
-             clearInterval(intval);
-            res(true);
-          }
-        }, 3000);
-      });
-
-      //stop listening
-      unsubscribe();
-
-      expect(spy).toHaveBeenCalled();
-      return expect(result).toBeTruthy();
-    })
-
-
-  })
   
-  describe('real-time listen to one document module', ()=>{
-    const oldName = 'change this document\'s name';
-    let repo;
-    let archive;
-    let docRef;
+
+  describe('get data by query suite', ()=>{
+    let userRepo = null;
 
     afterAll(async (done) => {
       done();
     });
 
     beforeAll(async ()=>{
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000000;
-
-      repo = await GetRepository(TripArchive);
-      archive = await CreateTripArchive(fakeUser.uid, oldName);
-      docRef = repo.getDocumentReference(archive.id);
+      userRepo = await GetRepository(User);
     })
 
-    it('ListenToDocument() function', async ()=>{
-      
-      //will use jest to spy on it
-      const cbObj={
-        fn:(_doc)=>{
-          // console.log('receive document changed', doc);
-        }
-      }
-  
-      const spy = jest.spyOn(cbObj, 'fn');
-  
-      //check if document's name is old name
-      let doc = await repo.findById(archive.id);
-      expect(doc.name).toEqual(oldName);
-  
-      //start listening to document change
-      const unsubscribe = ListenToDocument<TripArchive, ImprovedRepository<TripArchive>>(
-      repo, docRef, cbObj.fn,(err)=>console.log(err));
-      
-      //update document's name to new name
-      const newName = 'The name has been changed';
-      doc = await repo.findById(archive.id);
-      doc.name = newName;
-      await repo.update(doc);
-      
-      //stop listening
-      unsubscribe();
-  
-      expect(spy).toBeCalled();
-      doc = await repo.findById(archive.id);
-      return expect(doc.name).toEqual(newName);
-    })
-  });
+    it('GetDataByQuery() function search user by id', async ()=>{
 
-  describe('get data by query module', ()=>{
-    let repo = null;
-
-    afterAll(async (done) => {
-      done();
-    });
-
-    beforeAll(async ()=>{
-      repo = await GetRepository(TripArchive);
-      await CreateTripArchive(fakeUser.uid, '@@ $$ %%');
-      await CreateTripArchive(fakeUser.uid, 'Germany Travel');
-      await CreateTripArchive(fakeUser.uid, 'Greece Travel');
-      await CreateTripArchive(fakeUser.uid, 'Australia Travel');
-      await CreateTripArchive(fakeUser.uid, 'USA Travel');
-      await CreateTripArchive(fakeUser.uid, 'France Travel');
-      await CreateTripArchive(fakeUser.uid, 'Hungary Travel');
-    })
-
-    it('GetDataByQuery() function with search keyword, 1 result', async ()=>{
-      const keywords = ConvertSearchKeywordToArray('yy $$');
-
-      const colRef = await GetCollectionRef(TripArchive);
-      let query = colRef.where('ownerId', '==', fakeUser.uid);
-      query = query.where('tags', 'array-contains-any', keywords);
-      query = query.orderBy('createAt', 'desc');
-      const result = await GetDataByQuery(repo, query, 1);
+      const colRef = await GetCollectionRef(User);
+      let query = colRef.where('id', '==', testUser.uid);
+      const result = await GetDataByQuery<User>(userRepo, query, 1);
       
       expect(result.lastDocSnapshotCursor).not.toBeNull();
-      return expect(result.results).toHaveLength(1);
-    })
-
-    it('GetDataByQuery() function with search keyword, no result', async ()=>{
-      const keywords = ConvertSearchKeywordToArray('^^^^^^^^^');
-
-      const colRef = await GetCollectionRef(TripArchive);
-      let query = colRef.where('ownerId', '==', fakeUser.uid);
-      query = query.where('tags', 'array-contains-any', keywords);
-      query = query.orderBy('createAt', 'desc');
-      const result = await GetDataByQuery(repo, query, 1);
-      
-      expect(result.lastDocSnapshotCursor).toBeNull();
-      return expect(result.results).toHaveLength(0);
-    })
-
-    it('GetDataByQuery() function with search keyword, multiple result in pagination', async ()=>{
-      const words = 'Germany Greece USA Australia Hungary France';
-      const keywords = ConvertSearchKeywordToArray(words);
-
-      const colRef = await GetCollectionRef(TripArchive);
-      let query = colRef.where('ownerId', '==', fakeUser.uid);
-      query = query.where('tags', 'array-contains-any', keywords);
-      query = query.orderBy('createAt', 'desc');
-      const result = await GetDataByQuery(repo, query, 2);
-      
-      expect(result.lastDocSnapshotCursor).not.toBeNull();
-      expect(result.results).toHaveLength(2);
-
-      const result2 = await GetDataByQuery(repo, query, 2, result.lastDocSnapshotCursor);
-      expect(result2.lastDocSnapshotCursor).not.toBeNull();
-      expect(result2.results).toHaveLength(2);
-
-      const result3 = await GetDataByQuery(repo, query, 2, result2.lastDocSnapshotCursor);
-      expect(result3.lastDocSnapshotCursor).not.toBeNull();
-      expect(result3.results).toHaveLength(2);
-
-      const result4 = await GetDataByQuery(repo, query, 2, result3.lastDocSnapshotCursor);
-      expect(result4.lastDocSnapshotCursor).not.toBeNull();
-      return expect(result4.results).toHaveLength(0);
-
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].id).toEqual(testUser.uid);
     })
   })
 
+  
   describe('create itinerary module', ()=>{
-    let tripArchive: TripArchive = null;
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate()+3);
@@ -312,32 +95,20 @@ describe("Firebase utility test", () => {
       done();
     });
 
-    beforeAll(async ()=>{
-      tripArchive = await CreateTripArchive(fakeUser.uid, 'create itinerary');
-    })
-
-    it('CreateItineraryForTripArchive() function', async ()=>{
-      await CreateItineraryForTripArchive(
-        fakeUser.uid,
-        tripArchive.id,
-        'it name',
-        startDate,
-        endDate
-      );
-
-      const it = await CreateItineraryForTripArchive(
-        fakeUser.uid,
-        tripArchive.id,
+    it('CreateItinerary() function', async ()=>{
+      const it = await CreateItinerary(
         name,
         startDate,
         endDate
       );
       expect(it).not.toBeNull();
-      expect(it.tripArchiveId).toEqual(tripArchive.id);
-      return expect(it.name).toEqual(name);
+      expect(it.name).toEqual(name);
+      expect(it.startDateUTC.toLocaleDateString()).toEqual(startDate.toLocaleDateString());
+      expect(it.endDateUTC.toLocaleDateString()).toEqual(endDate.toLocaleDateString());
+      expect(it.totalDays).toEqual(4);
     })
   })
-
+  /*
   describe('update itinerary module', ()=>{
     let tripArchive: TripArchive = null;
     let itnerary: Itinerary;
@@ -530,4 +301,106 @@ describe("Firebase utility test", () => {
       return expect(updateSchedule.note).toEqual(newNote);
     })
   })
+  */
+
+
+ /* 
+ describe('real-time listen to collection module', ()=>{
+    afterAll(async (done) => {
+      done();
+    });
+    beforeAll(()=>{
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000000;
+    })
+
+    it('ListenToRepository() function', async()=>{
+      //will use jest to spy on it
+      const cbObj ={ 
+        fn:(_docs)=>{
+          //uncomment to see log
+          // console.log('receive documents changed under collection', docs);
+        }
+      };
+      const spy = jest.spyOn(cbObj, 'fn');
+
+      //start listening to collection change
+      const unsubscribe = ListenToRepository<TripArchive, ImprovedRepository<TripArchive>>(
+        await GetRepository(TripArchive), 
+        cbObj.fn,
+        (err)=>console.log(err)
+      );
+
+      //create 2 trip archives automatically
+      const result = await new Promise((res)=>{
+        let count = 0;
+        const intval = setInterval(async ()=>{
+          await CreateTripArchive(fakeUser.uid, `Auto created trip archive ${count}`);
+          count++;
+          if(count >= 2){
+            clearInterval(intval);
+            res(true);
+          }
+        }, 3000);
+      });
+
+      //stop listening
+      unsubscribe();
+
+      expect(spy).toHaveBeenCalled();
+      return expect(result).toBeTruthy();
+    })
+  })
+
+  describe('real-time listen to one document module', ()=>{
+    const oldName = 'change this document\'s name';
+    let repo;
+    let archive;
+    let docRef;
+
+    afterAll(async (done) => {
+      done();
+    });
+
+    beforeAll(async ()=>{
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000000;
+
+      repo = await GetRepository(TripArchive);
+      archive = await CreateTripArchive(fakeUser.uid, oldName);
+      docRef = repo.getDocumentReference(archive.id);
+    })
+
+    it('ListenToDocument() function', async ()=>{
+      
+      //will use jest to spy on it
+      const cbObj={
+        fn:(_doc)=>{
+          // console.log('receive document changed', doc);
+        }
+      }
+
+      const spy = jest.spyOn(cbObj, 'fn');
+
+      //check if document's name is old name
+      let doc = await repo.findById(archive.id);
+      expect(doc.name).toEqual(oldName);
+
+      //start listening to document change
+      const unsubscribe = ListenToDocument<TripArchive, ImprovedRepository<TripArchive>>(
+      repo, docRef, cbObj.fn,(err)=>console.log(err));
+      
+      //update document's name to new name
+      const newName = 'The name has been changed';
+      doc = await repo.findById(archive.id);
+      doc.name = newName;
+      await repo.update(doc);
+      
+      //stop listening
+      unsubscribe();
+
+      expect(spy).toBeCalled();
+      doc = await repo.findById(archive.id);
+      return expect(doc.name).toEqual(newName);
+    })
+  });
+  */
 });

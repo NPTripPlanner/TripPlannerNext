@@ -117,11 +117,11 @@ export interface IUpdateItineraryData{
  * if any field is undifined or null will be ignored
  * 
  * 
- * @return true if nothing went wrong
+ * @return itinerary id
  */
 export async function updateItinerary(
     firestore:Firestore, userId:string, itineraryId:string, 
-    dataToUpdate:IUpdateItineraryData): Promise<boolean>{
+    dataToUpdate:IUpdateItineraryData): Promise<string>{
 
         if(!userId) throw new https.HttpsError('invalid-argument','userId is required');
         if(!itineraryId) throw new https.HttpsError('invalid-argument', 'itineraryId was not given');
@@ -168,7 +168,7 @@ export async function updateItinerary(
         batch.update(itSnapshot.ref, itinerary.toFirestore());
         await batch.commit();
 
-        return true;
+        return itDocRef.id;
 }
 
 export async function deleteItinerary(

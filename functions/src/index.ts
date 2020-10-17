@@ -60,7 +60,7 @@ export const initUserHttps = https.onCall(async (data:InitUserHttpsData, context
             displayName:data.displayName,
         });
         
-        return id;
+        return {id};
     }
     catch(err){
         console.log('init user '+err);
@@ -83,9 +83,9 @@ export const createItineraryHttps = https.onCall(
 
             if(!userId) throw new https.HttpsError('data-loss',`Missing user id`);
 
-            const itId = await createItinerary(firestore, userId, name, startDate, endDate)
+            const id = await createItinerary(firestore, userId, name, startDate, endDate)
 
-            return itId
+            return {id}
         }
         catch(err){
             console.log('create itinerary '+err);
@@ -106,9 +106,9 @@ export const updateItineraryHttps = https.onCall(
 
             const {itineraryId, dataToUpdate} = data;
 
-            const result = await updateItinerary(firestore, userId, itineraryId, dataToUpdate);
+            const id = await updateItinerary(firestore, userId, itineraryId, dataToUpdate);
 
-            return result;
+            return {id};
 
         }
         catch(err){
@@ -128,9 +128,9 @@ export const deleteItineraryHttps = https.onCall(async (
         const auth = validateAuthFromFunctionContext(context);
         const userId = auth.uid;
 
-        const result = await deleteItinerary(firestore, userId, data.itineraryId);
+        const successful = await deleteItinerary(firestore, userId, data.itineraryId);
 
-        return result;
+        return {successful};
     }
     catch(err){
         console.log(err.message);

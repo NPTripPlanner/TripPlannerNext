@@ -8,9 +8,9 @@
     "export": "next export",
     "deploy-build": "npm run build && npm run export",
     "start": "next start",
-    "test": "jest --forceExit --detectOpenHandles",
+    "util-test": "jest --detectOpenHandles src/__tests__/util.test/*test.ts",
     "test-watch": "jest --watch",
-    "ui-test":"jest src/__tests__/ui.test/*.test.tsx",
+    "ui-test": "jest src/__tests__/ui.test/*.test.tsx",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

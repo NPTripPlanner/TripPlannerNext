@@ -8,8 +8,6 @@ import ImprovedRepository from './ImprovedRepository';
 
 export class Schedule{
     id: string;
-    createAt: Date;
-    modifyAt: Date;
     date: Date;
     note: string;
 }
@@ -17,37 +15,40 @@ export class Schedule{
 @Collection('itineraries')
 export class Itinerary{
     id: string;
-    createAt: Date;
-    modifyAt: Date;
     name:string;
     startDateUTC: Date;
     endDateUTC: Date;
     totalDays: number;
-    tripArchiveId: string;
 
     @SubCollection(Schedule, 'schedules')
     schedules?:ISubCollection<Schedule>;
 }
 
-@Collection('tripArchive')
-export class TripArchive {
+@Collection('userItineraries')
+export class UserItinerary {
     id: string;
-    createAt: Date;
-    modifyAt: Date;
-    ownerId: string;
-    name: string;
-    tags: Array<string>;
+    totalItineraries: number;
 
     @SubCollection(Itinerary, 'itineraries')
     itineraries?:ISubCollection<Itinerary>;
 }
 
+@Collection('users')
+export class User{
+    id: string;
+    displayName: string;
+    email: string;
+}
 
-@CustomRepository(TripArchive)
-export class TripArchiveRepository extends ImprovedRepository<TripArchive>{}
+
+@CustomRepository(User)
+export class UserRepo extends ImprovedRepository<User>{}
+
+@CustomRepository(UserItinerary)
+export class UserItineraryRepo extends ImprovedRepository<UserItinerary>{}
 
 @CustomRepository(Itinerary)
-export class ItineraryRepository extends ImprovedRepository<Itinerary>{}
+export class ItineraryRepo extends ImprovedRepository<Itinerary>{}
 
 @CustomRepository(Schedule)
 export class ScheduleRepository extends ImprovedRepository<Schedule>{}
