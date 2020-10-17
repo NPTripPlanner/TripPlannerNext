@@ -3,7 +3,7 @@
 
 import User from '../models/userDoc';
 import UserItinerary from '../models/userItineraryDoc';
-import colNames from './firestoreColNames';
+import colNames from '../models/firestoreColNames';
 import { https } from 'firebase-functions';
 import { Firestore } from '@google-cloud/firestore';
 

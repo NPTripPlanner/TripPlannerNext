@@ -5,7 +5,7 @@ export default {
     userItineraries:{
         identifier:'userItineraries',
         itineraries:{
-            identifier:'itineraries'
+            identifier:'itineraries',
         },
     },
 }

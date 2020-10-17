@@ -3,7 +3,7 @@ import {deleteDocuments, getAllDocumentsPathUnder} from './utils';
 import moment = require('moment');
 import { UserItineraryConverter } from '../models/userItineraryDoc';
 import Itinerary, { ItineraryConverter } from '../models/itineraryDoc';
-import colNames from './firestoreColNames';
+import colNames from '../models/firestoreColNames';
 import { https } from 'firebase-functions';
 import { Firestore } from '@google-cloud/firestore';
 
@@ -45,7 +45,7 @@ export async function createItinerary(
         if(!itineraryName) throw new https.HttpsError('invalid-argument','Itinerary name is required');
 
         //check if userItinerary document exists
-        const userItDocRef = await firestore.collection('userItineraries').doc(userId)
+        const userItDocRef = await firestore.collection(colNames.userItineraries.identifier).doc(userId)
         .withConverter(UserItineraryConverter);
 
         const userItSnapshot = await userItDocRef.get();
