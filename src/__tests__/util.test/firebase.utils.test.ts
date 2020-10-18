@@ -1,4 +1,5 @@
-import { User } from "../../schema/firestore.schema";
+import { Itinerary, User, UserItinerary } from "../../schema/firestore.schema";
+import ImprovedRepository from "../../schema/ImprovedRepository";
 import { 
   ClearTestFirestore,
   InitFirebase, 
@@ -10,16 +11,17 @@ import {
   GetCollectionRef,
   GetDataByQuery,
   // ConvertSearchKeywordToArray,
-  // DeleteItinerary,
+  DeleteItinerary,
   // ConvertRepo,
   // CreateScheduleForItinerary,
   // DeleteSchedule,
   // GetScheduls,
   // GetScheduleById,
   // UpdateSchedule,
-  // UpdateItinerary
+  UpdateItinerary,
   testUser,
-  CreateItinerary
+  CreateItinerary,
+  ConvertRepo
 } from "../../utils/firebase/firebase.utils";
 
 // import {Itinerary } from "../../schema/firestore.schema";
@@ -53,10 +55,11 @@ describe("Firebase utility test", () => {
       done();
     });
 
-    it('initializeUser function', async ()=>{
+    it('InitializeUser successful', async (done)=>{
       const userId = await InitializeUser(testUser.displayName, testUser.email);
 
-      return expect(userId).toEqual(testUser.uid);
+      expect(userId).toEqual(testUser.uid);
+      done();
     })
   })
 
@@ -73,7 +76,7 @@ describe("Firebase utility test", () => {
       userRepo = await GetRepository(User);
     })
 
-    it('GetDataByQuery() function search user by id', async ()=>{
+    it('GetDataByQuery() search user by id', async (done)=>{
 
       const colRef = await GetCollectionRef(User);
       let query = colRef.where('id', '==', testUser.uid);
@@ -82,11 +85,12 @@ describe("Firebase utility test", () => {
       expect(result.lastDocSnapshotCursor).not.toBeNull();
       expect(result.results).toHaveLength(1);
       expect(result.results[0].id).toEqual(testUser.uid);
+      done();
     })
   })
 
   
-  describe('create itinerary module', ()=>{
+  describe('create itinerary suite', ()=>{
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate()+3);
@@ -96,7 +100,7 @@ describe("Firebase utility test", () => {
       done();
     });
 
-    it('CreateItinerary() function', async ()=>{
+    it('CreateItinerary() successful', async (done)=>{
       const it = await CreateItinerary(
         name,
         startDate,
@@ -107,11 +111,11 @@ describe("Firebase utility test", () => {
       expect(it.startDateUTC.toLocaleDateString()).toEqual(startDate.toLocaleDateString());
       expect(it.endDateUTC.toLocaleDateString()).toEqual(endDate.toLocaleDateString());
       expect(it.totalDays).toEqual(4);
+      done();
     })
   })
-  /*
-  describe('update itinerary module', ()=>{
-    let tripArchive: TripArchive = null;
+  
+  describe('update itinerary suite', ()=>{
     let itnerary: Itinerary;
     const startDate = new Date();
     const endDate = new Date();
@@ -123,104 +127,184 @@ describe("Firebase utility test", () => {
     });
 
     beforeAll(async ()=>{
-      tripArchive = await CreateTripArchive(fakeUser.uid, 'create itinerary');
-      itnerary = await CreateItineraryForTripArchive(
-        fakeUser.uid,
-        tripArchive.id,
+      itnerary = await CreateItinerary(
         name,
         startDate,
         endDate
       );
     });
 
-    it('UpdateItinerary() function', async ()=>{
-      const newName = 'my updated itinerary';
-      const returnedIt = await UpdateItinerary(fakeUser.uid, tripArchive.id, itnerary.id, {
-        name: newName,
-        startDate: startDate,
-        endDate: endDate,
-      });
+    it('UpdateItinerary() with new name successful', async (done)=>{
+      const newName = 'This is cool';
+      const it = await UpdateItinerary(itnerary.id, newName, startDate, endDate);
 
-      return expect(returnedIt.name).toEqual(newName);
+      expect(it.name).toEqual(newName);
+      done();
+    })
+
+    it('UpdateItinerary() with start date and end date successful', async (done)=>{
+      const newStartDate = new Date();
+      newStartDate.setDate(newStartDate.getDate()+4);
+      const newEndDate = new Date();
+      newEndDate.setDate(newStartDate.getDate()+5);
+
+      const it = await UpdateItinerary(itnerary.id, null, newStartDate, newEndDate);
+
+      expect(it.startDateUTC.toLocaleDateString()).toEqual(newStartDate.toLocaleDateString());
+      expect(it.endDateUTC.toLocaleDateString()).toEqual(newEndDate.toLocaleDateString());
+      done();
+    })
+
+    it('UpdateItinerary() without data successful', async (done)=>{
+
+      const it = await UpdateItinerary(itnerary.id);
+
+      expect(it).not.toBeNull();
+      done();
+    })
+
+    it('UpdateItinerary() with start date only fail', async (done)=>{
+
+      const newStartDate = new Date();
+      newStartDate.setDate(newStartDate.getDate()+4);
+
+      try{
+        await UpdateItinerary(itnerary.id, null, newStartDate, null);
+        done();
+      }
+      catch(err){
+        expect(err).toBeDefined();
+        done();
+      }
+    })
+
+    it('UpdateItinerary() with end date only fail', async (done)=>{
+
+      const newEndDate = new Date();
+      newEndDate.setDate(newEndDate.getDate()+4);
+
+      try{
+        await UpdateItinerary(itnerary.id, null, null, newEndDate);
+        done();
+      }
+      catch(err){
+        expect(err).toBeDefined();
+        done();
+      }
     })
   })
 
-  describe('delete itinerary module', ()=>{
-    let tripArchive: TripArchive = null;
+  describe('delete itinerary suite', ()=>{
     let itinerary;
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate()+3);
-    const name = 'deleted not able to see this';
+    const name = 'Must be deleted';
 
     afterAll(async (done) => {
       done();
     });
 
     beforeAll(async ()=>{
-      tripArchive = await CreateTripArchive(fakeUser.uid, 'delete itinerary');
 
-      itinerary = await CreateItineraryForTripArchive(
-        fakeUser.uid,
-        tripArchive.id,
+      itinerary = await CreateItinerary(
         name,
         startDate,
         endDate
       );
     })
 
-    it('DeleteItinerary() function', async ()=>{
-
-      expect(itinerary).not.toBeNull();
-      expect(itinerary.tripArchiveId).toEqual(tripArchive.id);
+    it('DeleteItinerary() successful', async (done)=>{
       
-      const result = await DeleteItinerary(fakeUser.uid, tripArchive.id, itinerary.id);
-      expect(result).toBeTruthy();
+      const result = await DeleteItinerary(itinerary.id);
+      expect(result).toEqual(true);
+      done();
 
-      const nonExists = await tripArchive.itineraries.findById(itinerary.id);
-      return expect(nonExists).toBeNull();
+    })
+
+    it('DeleteItinerary() with wrong id fail', async (done)=>{
+      
+      const id = 'do not exist'
+      try{
+        await DeleteItinerary(id);
+        done();
+      }
+      catch(err){
+        expect(err).toBeDefined();
+        done();
+      }
+
     })
   })
-
-  describe('query itinerary module', ()=>{
+  
+  describe('query itinerary suit', ()=>{
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(startDate.getDate()+3);
     const names = [];
+    const itName = '@my itinerary@';
+    const numberOfItinerary = 12;
+    let itineraryRepo:ImprovedRepository<Itinerary>;
 
     afterAll(async (done) => {
       done();
     });
 
-    let tripArchive: TripArchive = null;
     beforeAll(async ()=>{
-      tripArchive = await CreateTripArchive(fakeUser.uid, 'delete itinerary');
 
       //create 12 itineraries
-      for(let i=0; i<12; i++){
-        names.push(`itinerary name ${i}`);
+      for(let i=0; i<numberOfItinerary; i++){
+        names.push(itName);
       }
 
       for(let name of names){
-        await CreateItineraryForTripArchive(
-          fakeUser.uid,
-          tripArchive.id,
+        await CreateItinerary(
           name,
           startDate,
           endDate
         );
       }
+
+      //retrieve root collection of userItineraries
+      const repo = await GetRepository(UserItinerary);
+      //find userItinerary document
+      const userItinerary = await repo.findById(testUser.uid);
+      //retrieve collection under userItinerary document
+      itineraryRepo = await ConvertRepo<Itinerary>(userItinerary.itineraries)
     })
 
-    it('query all itineraries', async ()=>{
+    it('GetDataByQuery() query all itineraries that match certain name', async (done)=>{
 
-      const repo = await ConvertRepo<Itinerary>(tripArchive.itineraries);
-      let query = repo.getCollectionReference().orderBy('createAt', 'desc');
-      const results = await GetDataByQuery(repo, query, 0);
-      return expect(results.results).toHaveLength(12);
+      let query = itineraryRepo.getCollectionReference().where('name', '==', itName);
+      const results = await GetDataByQuery(itineraryRepo, query, 0);
+      expect(results.results).toHaveLength(numberOfItinerary);
+      done()
+    })
+
+    it('GetDataByQuery() query itineraries with pagination', async (done)=>{
+
+      const queryAmount = 4;
+      let query = itineraryRepo.getCollectionReference().where('name', '==', itName);
+
+      //first query return 4
+      let result = await GetDataByQuery(itineraryRepo, query, queryAmount);
+      expect(result.results).toHaveLength(queryAmount);
+
+      //second query return 4
+      result = await GetDataByQuery(itineraryRepo, query, queryAmount, result.lastDocSnapshotCursor);
+      expect(result.results).toHaveLength(queryAmount);
+
+      //third query return 4
+      result = await GetDataByQuery(itineraryRepo, query, queryAmount, result.lastDocSnapshotCursor);
+      expect(result.results).toHaveLength(queryAmount);
+
+      //last query return 0 as total itineraries are 12
+      result = await GetDataByQuery(itineraryRepo, query, queryAmount, result.lastDocSnapshotCursor);
+      expect(result.results).toHaveLength(0);
+      done()
     })
   })
-
+  /*
   describe('Schedule CRUD module', ()=>{
     let tripArchive = null;
     let itinerary = null;

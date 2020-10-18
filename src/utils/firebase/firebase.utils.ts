@@ -22,7 +22,13 @@ export let firebaseAuth : Auth;
 export let firebaseDatabase : FirestoreDB;
 export let cloudFunctions : CloudFunctions;
 
-export const testUser = {
+export interface PresentUser{
+  uid:string;
+  displayName:string;
+  email:string;
+}
+
+export const testUser: PresentUser = {
   uid: 'test',
   displayName: 'test',
   email: 'test@gmail.com'
@@ -87,32 +93,57 @@ export const ClearApp = async () => {
 //#endregion App
 
 //#region User
-export interface PresentUser{
-  uid:string;
-  displayName:string;
-  email:string;
-}
-export const GetCurrentUser = () => {
-  return new Promise<PresentUser|null>((resolve, reject) => {
-    if(process.env.NODE_ENV === 'test'){
-      return resolve(testUser);
+
+/**
+ * Tranform firebase user to PresentUser
+ * 
+ * @param user Firebase User
+ * 
+ * @return null if no user data or instance of PresentUser 
+ */
+const transformFirebaseUser = (user:FirebaseUser)=>{
+  if(user){
+    const presentUser:PresentUser = {
+      uid:user.uid,
+      displayName:user.displayName,
+      email:user.email,
     }
-    const unsubscribe = firebaseAuth.onAuthStateChanged((user) => {
-      unsubscribe();
-      if (user) {
-        const presentUser:PresentUser = {
-          uid:user.uid,
-          displayName:user.displayName,
-          email:user.email,
-        }
-        resolve(presentUser);
-      } else {
-        return resolve(null);
-      }
-    }, reject);
-  });
+    return presentUser
+  }
+
+  return null;
+}
+
+/**
+ * Get current signed in user
+ * 
+ * @return null if no user signed in or instance of PresentUser
+ */
+export const GetCurrentUser = () => {
+  if(process.env.NODE_ENV === 'test') return testUser;
+  return transformFirebaseUser(firebaseAuth.currentUser);
 };
 
+/**
+ * Listen to user state changed
+ * 
+ * @param callback called when user state changed
+ * 
+ * @return firebase.Unsubscribe function, call return function
+ * if you don't want to listen anymore
+ */
+export const ListenToUserStateChanged = (callback:(user:PresentUser|null)=>void)=>{
+  return firebaseAuth.onAuthStateChanged((user)=>{
+    callback(transformFirebaseUser(user));
+  })
+}
+
+/**
+ * Sign up user with email and password
+ * @param email user email
+ * @param password  user password
+ * @param displayName  user display name
+ */
 export const SignUpWithEmailAndPassword = async (
   email:string,
   password:string,
@@ -130,9 +161,10 @@ export const SignUpWithEmailAndPassword = async (
       const result = await InitializeUser(userCredential.user.displayName, userCredential.user.email);
       if(!result) throw Error('Initilize user fail');
     }
-    return userCredential;
+    return Promise.resolve(userCredential);
   } catch (err) {
-    throw Error(getErrorMsg(err.code));
+    console.log(err);
+    return Promise.reject(err.message);
   }
 };
 
@@ -145,32 +177,72 @@ export const SignUpWithEmailAndPassword = async (
  * @return user id as string
  */
 export const InitializeUser = async (displayName:string, email:string):Promise<string>=>{
-  const result = await cloudFunctions.httpsCallable('initUserHttps')({
-    displayName:displayName,
-    email:email,
-  });
-  return result.data.id;
+  try{
+    const result = await cloudFunctions.httpsCallable('initUserHttps')({
+      displayName:displayName,
+      email:email,
+    });
+    return Promise.resolve<string>(result.data.id);
+  }
+  catch(err){
+    console.log(err);
+    return Promise.reject(err.message);
+  }
 }
 
+/**
+ * Login user with email and password
+ * @param email user email
+ * @param password user passowrd
+ * 
+ * @return null if user not signed in or instance of PresentUser
+ */
 export const LoginWithEmailAndPassword = async (email:string, password:string) => {
   try {
     await firebaseAuth.signInWithEmailAndPassword(email, password);
-    return await GetCurrentUser();
+    const currentUser = GetCurrentUser();
+    if(currentUser){
+      return Promise.resolve(currentUser);
+    }
+    return Promise.resolve<null>(null);
+
   } catch (err) {
-    throw Error(getErrorMsg(err.code));
+    console.log(err);
+    return Promise.reject(err.message);
   }
 };
 
+/**
+ * Send an email to user inbox to reset password
+ * 
+ * @param email user email
+ * 
+ * @return true if email sent successful
+ */
 export const SendForgotPasswordMail = async (email:string) => {
   try {
     await firebaseAuth.sendPasswordResetEmail(email);
+    return Promise.resolve(true);
   } catch (err) {
-    throw Error(getErrorMsg(err.code));
+    console.log(err);
+    return Promise.reject(err.message);
   }
 };
 
+/**
+ * Log out current user 
+ * 
+ * @return true if use logout successful
+ */
 export const Logout = async () => {
-  await firebaseAuth.signOut();
+  try{
+    await firebaseAuth.signOut();
+    return Promise.resolve(true);
+  }
+  catch(err){
+    console.log(err);
+    return Promise.reject(err.message);
+  }
 };
 
 //#endregion User
@@ -199,7 +271,14 @@ T extends fireorm.IEntity,
 ConvertToType = ImprovedRepository<T>
 >
 (entity:fireorm.Constructor<T>)=>{
-  return (await fireorm.getRepository(entity)) as unknown as ConvertToType;
+  try{
+    const result = (await fireorm.getRepository(entity)) as unknown as ConvertToType;
+    return Promise.resolve(result);
+  }
+  catch(err){
+    console.log(err);
+    return Promise.reject(err.message);
+  }
 }
 
 /**
@@ -212,7 +291,14 @@ ConvertToType = ImprovedRepository<T>
  * @param repo which is class extends from fireorm BaseRepository
  */
 export const ConvertRepo = async <T extends IEntity,>(repo:BaseRepository)=>{
-  return repo as unknown as ImprovedRepository<T>;
+  try{
+    const result =  repo as unknown as ImprovedRepository<T>;
+    return Promise.resolve(result);
+  }
+  catch(err){
+    console.log(err);
+    return Promise.reject(err.message);
+  }
 }
 
 /**
@@ -220,7 +306,15 @@ export const ConvertRepo = async <T extends IEntity,>(repo:BaseRepository)=>{
  * @param entity which is class extends from fireorm BaseRepository
  */
 export const GetCollectionRef = async <T extends fireorm.IEntity>(entity:fireorm.Constructor<T>)=>{
-  return (await GetRepository(entity)).getCollectionReference();
+  try{
+
+    const result = (await GetRepository(entity)).getCollectionReference();
+    return Promise.resolve(result);
+  }
+  catch(err){
+    console.log(err);
+    return Promise.reject(err.message);
+  }
 }
 //#endregion Fireorm
 
@@ -285,32 +379,36 @@ export const GetDataByQuery = async  <T extends fireorm.IEntity>(
   query:Query,
   amount:number = 5,
   startAfter:QueryDocumentSnapshot|null = null, 
-  ):Promise<QueryDataReturn<T>>=> {
+  )=> {
 
-  const repo = repository;
+    try{
+      const repo = repository;
 
-  let newQuery = query;
-  if(startAfter) newQuery = newQuery.startAfter(startAfter);
-  if(amount > 0) newQuery = newQuery.limit(amount);
+      let newQuery = query;
+      if(startAfter) newQuery = newQuery.startAfter(startAfter);
+      if(amount > 0) newQuery = newQuery.limit(amount);
 
-  const q = await newQuery.get();
-  
+      const q = await newQuery.get();
+      
+      if(q.empty) return {
+        lastDocSnapshotCursor: startAfter,
+        results: Array<T>(),
+      };
 
-  if(q.empty) return {
-    lastDocSnapshotCursor: startAfter,
-    results: Array<T>(),
-  };
-
-  const results: T[] = [];
-  for(let snap of q.docs){
-    const data = await repo.findById(snap.id);
-    results.push(data);
-  }
-  return {
-    lastDocSnapshotCursor: q.docs[q.docs.length - 1],
-    results
-  };
-
+      const results: T[] = [];
+      for(let snap of q.docs){
+        const data = await repo.findById(snap.id);
+        results.push(data);
+      }
+      return Promise.resolve<QueryDataReturn<T>>({
+        lastDocSnapshotCursor: q.docs[q.docs.length - 1],
+        results
+      });
+    }
+    catch(err){
+      console.log(err);
+      return Promise.reject(err.message);
+    }
 }
 //#endregion Firestore query
 
@@ -363,7 +461,8 @@ export const CreateItinerary = async (
   itineraryName:string,
   startDate:Date,
   endDate:Date
-  ):Promise<Itinerary>=>{
+  )=>{
+
     try{
       const start = startDate.toUTCString();
       const end = endDate.toUTCString();
@@ -374,19 +473,19 @@ export const CreateItinerary = async (
       });
 
       const itineraryId = result.data.id;
-      console.log(itineraryId);
       const userItineraryRepo = await GetRepository(UserItinerary);
       const user = await GetCurrentUser();
       const userIt = await userItineraryRepo.findById(user.uid);
       const itineraries = await ConvertRepo<Itinerary>(userIt.itineraries);
       const it = await itineraries.findById(itineraryId);
       
-      return it;
+      return Promise.resolve(it);
     }
     catch(err){
       console.log(err)
-      throw Error(getErrorMsg(err.code));
+      return Promise.reject(err.message);
     }
+    
 }
 
 /**
@@ -416,8 +515,17 @@ export const CreateScheduleForItinerary = async (itinerary:Itinerary, date:Date,
 
 //#region Firestore update
 
-
-export const UpdateItinerary = async (
+/**
+ * Update itinerary
+ * 
+ * @param itineraryId  itinerary id
+ * @param name itinerary name optional
+ * @param startDate itinerary start date, if given endDate must be given
+ * @param endDate itinerary end date, if given startDate must be given
+ * 
+ * @return itinerary id if successful
+ */
+export const UpdateItinerary = async(
   itineraryId:string,
   name:string = null,
   startDate:Date = null,
@@ -425,7 +533,6 @@ export const UpdateItinerary = async (
   )=>{
 
     try{
-
       const result = await cloudFunctions.httpsCallable('updateItineraryHttps')({
         itineraryId: itineraryId,
         dataToUpdate: {
@@ -439,12 +546,13 @@ export const UpdateItinerary = async (
       const userItineraryRepo = await GetRepository(UserItinerary);
       const user = await GetCurrentUser();
       const userIt = await userItineraryRepo.findById(user.uid);
-      const it = userIt.itineraries.findById(itId);
+      const it = await userIt.itineraries.findById(itId);
       
-      return it;
+      return Promise.resolve(it);
     }
     catch(err){
-      throw Error(getErrorMsg(err.code));
+      console.log(err);
+      return Promise.reject(err.message);
     }
 }
 
@@ -463,28 +571,23 @@ export const UpdateSchedule = async (itinerary:Itinerary, newSchedule:Schedule)=
 /**
  * Delete an itinerary
  * 
- * Call cloud function
- * 
- * @param userId user id
- * @param archiveId  trip archive id that itinerary should be deleted under
  * @param itineraryId itinerary id
+ * 
+ * @return true if successful
  */
 export const DeleteItinerary = async (
-  userId:string,
-  archiveId:string,
   itineraryId:string
   )=>{
     try{
       const result = await cloudFunctions.httpsCallable('deleteItineraryHttps')({
-        userId: userId,
-        tripArchiveId: archiveId,
         itineraryId: itineraryId,
       });
       
-      return result.data;
+      return Promise.resolve(result.data.successful);
     }
     catch(err){
-      throw Error(getErrorMsg(err.code));
+      console.log(err)
+      return Promise.reject(err.message);
     }
 }
 
